@@ -27,7 +27,16 @@
     .sikap-select { width: 58px; text-align:center; font-weight:700; padding:4px; border:2px solid #e5e7eb; border-radius:8px; background:#fff; }
     .akad-input { width: 56px; text-align:center; font-weight:600; padding:4px; border:2px solid #e5e7eb; border-radius:8px; }
     .kelompok-input { width: 62px; text-align:center; font-weight:600; padding:4px; border:2px solid #e5e7eb; border-radius:8px; background:#fff; }
-    /* DARK MODE */
+    input:disabled, select:disabled { background:#f1f5f9 !important; color:#475569 !important; opacity:.85; }
+    body.dark input:disabled, body.dark select:disabled { background:#1e293b !important; color:#94a3b8 !important; }
+    tr.row-editing { background:#fef9c3 !important; }
+    body.dark tr.row-editing { background:#422006 !important; }
+    .btn-row-edit { background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 9px; font-size:14px; line-height:1; transition: all .2s; }
+    .btn-row-edit:hover { border-color:#3b82f6; background:#eff6ff; }
+    .btn-row-save { background:#2563eb; border:1px solid #2563eb; color:#fff; border-radius:8px; padding:5px 9px; font-size:14px; line-height:1; transition: all .2s; }
+    .btn-row-save:hover { background:#1d4ed8; }
+    .sikap-auto { width: 62px; text-align:center; font-weight:700; padding:4px; border:2px dashed #c7d2fe; border-radius:8px; background:#eef2ff; color:#4338ca; }
+    body.dark .sikap-auto { background:#1e1b4b; color:#c7d2fe; border-color:#4338ca; }
     body.dark { background:#0f172a !important; color:#f8fafc; transition:.3s; }
     body.dark .glass-effect { background:#0f172a; }
     body.dark .card-glass { background:#1e293b; color:#f8fafc; border-color:#334155; }
@@ -46,6 +55,8 @@
     body.dark .text-blue-700, body.dark .text-blue-800, body.dark .text-green-700, body.dark .text-purple-700,
     body.dark .text-indigo-700, body.dark .text-amber-600, body.dark .text-yellow-700,
     body.dark .text-red-700, body.dark .text-orange-700, body.dark .text-emerald-700 { color:#e2e8f0 !important; }
+    body.dark .btn-row-edit { background:#1e293b; border-color:#475569; }
+    body.dark .btn-row-save { background:#2563eb; border-color:#2563eb; }
   </style>
 </head>
 <body class="h-full" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);">
@@ -128,7 +139,7 @@
         <div class="card-glass rounded-2xl p-5 text-center shadow-lg">
           <div class="text-4xl mb-2">📅</div>
           <div id="dashboard-total-pertemuan" class="text-3xl font-extrabold text-amber-600">0</div>
-          <p class="text-gray-600 font-semibold">Total Pertemuan</p>
+          <p class="text-gray-600 font-semibold">Pertemuan SIKAP</p>
         </div>
       </div>
 
@@ -138,7 +149,7 @@
           <div class="bg-purple-50 rounded-xl p-4 text-center"><div id="dashboard-sikap-done" class="text-2xl font-bold text-purple-700">0</div><p class="text-sm text-gray-600">Siswa Dinilai SIKAP</p></div>
           <div class="bg-indigo-50 rounded-xl p-4 text-center"><div id="dashboard-akademik-done" class="text-2xl font-bold text-indigo-700">0</div><p class="text-sm text-gray-600">Siswa Dinilai Akademik</p></div>
           <div class="bg-amber-50 rounded-xl p-4 text-center"><div id="dashboard-rata-sikap" class="text-2xl font-bold text-amber-600">-</div><p class="text-sm text-gray-600">Rata-rata Nilai SIKAP</p></div>
-          <div class="bg-green-50 rounded-xl p-4 text-center"><div id="dashboard-rata-akademik" class="text-2xl font-bold text-green-700">-</div><p class="text-sm text-gray-600">Rata-rata Nilai Akademik</p></div>
+          <div class="bg-green-50 rounded-xl p-4 text-center"><div id="dashboard-rata-akademik" class="text-2xl font-bold text-green-700">-</div><p class="text-sm text-gray-600">Rata-rata Akademik (Gabungan)</p></div>
         </div>
       </div>
 
@@ -151,12 +162,12 @@
         <div class="menu-card card-glass rounded-2xl p-6 shadow-xl" onclick="showPage('penilaian-sikap')">
           <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-fuchsia-400 to-purple-600 flex items-center justify-center shadow-lg icon-bounce"><span class="text-4xl">⭐</span></div>
           <h3 class="text-xl font-bold text-blue-900 mb-2 text-center">Penilaian SIKAP</h3>
-          <p class="text-gray-600 text-sm text-center">Per pertemuan → akumulasi skala 100</p>
+          <p class="text-gray-600 text-sm text-center">Per pertemuan → masuk Asesmen Harian</p>
         </div>
         <div class="menu-card card-glass rounded-2xl p-6 shadow-xl" onclick="showPage('penilaian-akademik')">
           <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-lg icon-bounce"><span class="text-4xl">📝</span></div>
           <h3 class="text-xl font-bold text-blue-900 mb-2 text-center">Penilaian Akademik</h3>
-          <p class="text-gray-600 text-sm text-center">Per pertemuan → akumulasi bobot</p>
+          <p class="text-gray-600 text-sm text-center">Per semester → gabungan bobot</p>
         </div>
         <div class="menu-card card-glass rounded-2xl p-6 shadow-xl" onclick="showPage('penilaian-kelompok')">
           <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-amber-400 to-red-500 flex items-center justify-center shadow-lg icon-bounce"><span class="text-4xl">👥</span></div>
@@ -207,7 +218,7 @@
           <div class="text-6xl mb-4">🎓</div>
           <p class="text-gray-600 font-semibold">Belum ada data siswa</p>
         </div>
-        <p class="text-xs text-gray-500 mt-3">☁️ Data tersimpan otomatis di Supabase setiap ada perubahan. Buka ulang halaman untuk memuat data terbaru.</p>
+        <p class="text-xs text-gray-500 mt-3">☁️ Data tersimpan otomatis di Supabase setiap ada perubahan.</p>
       </div>
     </div>
 
@@ -238,12 +249,12 @@
           </div>
         </div>
         <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4 text-sm text-blue-900">
-          ℹ️ Skor tiap aspek <b>1-5</b> diinput <b>per pertemuan</b>.
-          Nilai pertemuan = (Total Skor ÷ 25) × 100.<br>
-          📊 <b>Akumulasi = rata-rata nilai seluruh pertemuan</b> (skala 100). ☁️ Tersimpan otomatis.
+          ℹ️ Baris <b>belum dinilai</b> → kolom aktif, isi langsung (otomatis tersimpan).<br>
+          ✏️ Baris <b>sudah dinilai</b> → terkunci, klik <b>✏️</b> untuk ubah → klik <b>💾</b> untuk simpan & kunci.<br>
+          📊 Akumulasi = rata-rata nilai seluruh pertemuan (skala 100) — <b>otomatis masuk ke Asesmen Harian di Penilaian Akademik</b>.
         </div>
 
-        <h3 class="font-bold text-blue-900 mb-3">Input Skor Pertemuan Ini</h3>
+        <h3 class="font-bold text-blue-900 mb-3">Skor Pertemuan Ini</h3>
         <div class="overflow-x-auto rounded-xl border border-gray-200 mb-2">
           <table class="w-full text-sm">
             <thead class="bg-blue-600 text-white">
@@ -257,6 +268,7 @@
                 <th class="px-2 py-3 text-center text-xs font-bold">Kolaborasi</th>
                 <th class="px-2 py-3 text-center text-xs font-bold">Total</th>
                 <th class="px-2 py-3 text-center text-xs font-bold">Nilai P. Ini</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Aksi</th>
               </tr>
             </thead>
             <tbody id="sikap-table-body"></tbody>
@@ -280,19 +292,17 @@
       </div>
     </div>
 
-    <!-- ============ PENILAIAN AKADEMIK ============ -->
+    <!-- ============ PENILAIAN AKADEMIK (PER SEMESTER + SIKAP di AH) ============ -->
     <div id="penilaian-akademik-page" class="hidden max-w-7xl mx-auto px-4 py-6">
       <button onclick="showPage('main')" class="mb-4 bg-white/90 hover:bg-white px-4 py-2 rounded-xl font-semibold text-blue-900 transition-all shadow-sm">← Kembali</button>
       <div class="card-glass rounded-2xl p-6 shadow-xl mb-6">
         <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div>
             <h2 class="text-2xl font-bold text-blue-900">Penilaian Akademik</h2>
-            <p class="text-sm text-gray-500">Tugas 1-6 • Asesmen Harian 1-3 • PTS • PSAS</p>
+            <p class="text-sm text-gray-500">Tugas 1-6 • Asesmen Harian 1-3 + SIKAP • PTS • PSAS — per Semester</p>
           </div>
           <div class="flex gap-2 flex-wrap">
-            <button id="btn-add-akademik-pertemuan" class="btn-primary text-white font-semibold py-2 px-4 rounded-xl shadow-md">+ Pertemuan</button>
             <button id="btn-export-akademik-excel" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-xl shadow-md">📥 Excel</button>
-            <button id="btn-delete-akademik-pertemuan" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl shadow-md">🗑 Hapus Pertemuan Ini</button>
             <button id="btn-reset-akademik" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-xl shadow-md">⟳ Reset Kelas</button>
           </div>
         </div>
@@ -302,13 +312,16 @@
             <select id="select-akademik-class" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-semibold bg-white"><option value="">Pilih Kelas</option></select>
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Pertemuan Ke-</label>
-            <select id="select-akademik-pertemuan" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-semibold bg-white"><option value="">-</option></select>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Semester</label>
+            <select id="select-akademik-semester" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-semibold bg-white">
+              <option value="1">Semester 1</option>
+              <option value="2">Semester 2</option>
+            </select>
           </div>
         </div>
-        <div id="akademik-info" class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4 text-sm text-blue-900">ℹ️ Input nilai <b>per pertemuan</b>.</div>
+        <div id="akademik-info" class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4 text-sm text-blue-900">ℹ️ Input nilai <b>per semester</b>.</div>
 
-        <h3 class="font-bold text-blue-900 mb-3">Input Nilai Pertemuan Ini</h3>
+        <h3 class="font-bold text-blue-900 mb-3">Nilai Semester Ini</h3>
         <div class="overflow-x-auto rounded-xl border border-gray-200 mb-2">
           <table class="w-full text-sm">
             <thead class="bg-blue-600 text-white">
@@ -316,13 +329,15 @@
                 <th rowspan="2" class="px-2 py-2 text-left text-xs font-bold">No</th>
                 <th rowspan="2" class="px-3 py-2 text-left text-xs font-bold">Nama Siswa</th>
                 <th colspan="6" class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400">Tugas</th>
-                <th colspan="3" class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400">Asesmen Harian</th>
+                <th colspan="4" class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400">Asesmen Harian (termasuk SIKAP)</th>
                 <th rowspan="2" class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400">PTS</th>
                 <th rowspan="2" class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400">PSAS</th>
+                <th rowspan="2" class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400 bg-blue-700">NA Smt</th>
+                <th rowspan="2" class="px-2 py-2 text-center text-xs font-bold">Aksi</th>
               </tr>
               <tr>
                 <th class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400">1</th><th class="px-1 py-2 text-center text-xs font-bold">2</th><th class="px-1 py-2 text-center text-xs font-bold">3</th><th class="px-1 py-2 text-center text-xs font-bold">4</th><th class="px-1 py-2 text-center text-xs font-bold">5</th><th class="px-1 py-2 text-center text-xs font-bold">6</th>
-                <th class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400">1</th><th class="px-1 py-2 text-center text-xs font-bold">2</th><th class="px-1 py-2 text-center text-xs font-bold">3</th>
+                <th class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400">1</th><th class="px-1 py-2 text-center text-xs font-bold">2</th><th class="px-1 py-2 text-center text-xs font-bold">3</th><th class="px-2 py-2 text-center text-xs font-bold bg-indigo-700">SIKAP</th>
               </tr>
             </thead>
             <tbody id="akademik-table-body"></tbody>
@@ -330,25 +345,21 @@
         </div>
         <div id="akademik-empty-state" class="hidden py-12 text-center">
           <div class="text-6xl mb-4">📝</div>
-          <p id="akademik-empty-text" class="text-gray-600 font-semibold">Pilih kelas & pertemuan untuk mulai menilai</p>
+          <p id="akademik-empty-text" class="text-gray-600 font-semibold">Pilih kelas untuk mulai menilai</p>
         </div>
       </div>
 
       <div class="card-glass rounded-2xl p-6 shadow-xl">
-        <h3 class="text-xl font-bold text-blue-900 mb-4">📊 Akumulasi Nilai Akademik <span id="akademik-akum-class" class="text-sm text-gray-500 font-normal"></span></h3>
+        <h3 class="text-xl font-bold text-blue-900 mb-4">📊 Rekap Akademik per Semester <span id="akademik-akum-class" class="text-sm text-gray-500 font-normal"></span></h3>
         <div class="overflow-x-auto rounded-xl border border-gray-200">
           <table class="w-full text-sm">
             <thead class="bg-emerald-600 text-white">
               <tr>
                 <th class="px-2 py-2 text-left text-xs font-bold">No</th>
                 <th class="px-3 py-2 text-left text-xs font-bold">Nama Siswa</th>
-                <th class="px-2 py-2 text-center text-xs font-bold">T1</th><th class="px-1 py-2 text-center text-xs font-bold">T2</th><th class="px-1 py-2 text-center text-xs font-bold">T3</th><th class="px-1 py-2 text-center text-xs font-bold">T4</th><th class="px-1 py-2 text-center text-xs font-bold">T5</th><th class="px-1 py-2 text-center text-xs font-bold">T6</th>
-                <th class="px-2 py-2 text-center text-xs font-bold bg-emerald-700">Rata Tugas</th>
-                <th class="px-2 py-2 text-center text-xs font-bold">AH1</th><th class="px-1 py-2 text-center text-xs font-bold">AH2</th><th class="px-1 py-2 text-center text-xs font-bold">AH3</th>
-                <th class="px-2 py-2 text-center text-xs font-bold bg-emerald-700">Rata AH</th>
-                <th class="px-2 py-2 text-center text-xs font-bold">PTS</th>
-                <th class="px-2 py-2 text-center text-xs font-bold">PSAS</th>
-                <th class="px-2 py-2 text-center text-xs font-bold bg-emerald-700">Nilai Akhir</th>
+                <th class="px-2 py-2 text-center text-xs font-bold">NA Semester 1</th>
+                <th class="px-2 py-2 text-center text-xs font-bold">NA Semester 2</th>
+                <th class="px-2 py-2 text-center text-xs font-bold bg-emerald-700">Nilai Akhir (Gabungan)</th>
                 <th class="px-2 py-2 text-center text-xs font-bold bg-emerald-700">Predikat</th>
               </tr>
             </thead>
@@ -356,7 +367,7 @@
           </table>
         </div>
         <div id="akademik-akum-empty" class="hidden py-8 text-center text-gray-500 font-semibold text-sm">Belum ada nilai yang diinput</div>
-        <p class="text-xs text-gray-500 mt-3">Merah = nilai akhir di bawah KKM (kelas X: 75, XI: 79, XII: 80). Nilai tiap kolom digabung otomatis dari seluruh pertemuan.</p>
+        <p class="text-xs text-gray-500 mt-3">Rata AH = rata-rata (AH 1-3 + Nilai SIKAP). NA per Semester = 35% Rata Tugas + 35% Rata AH + 20% PTS + 10% PSAS. Nilai Akhir Gabungan = rata-rata NA semester yang terisi. Merah = di bawah KKM (X: 75, XI: 79, XII: 80).</p>
       </div>
     </div>
 
@@ -391,7 +402,7 @@
         </div>
 
         <div>
-          <h3 class="font-bold text-blue-900 mb-4">Input Nilai Kelompok</h3>
+          <h3 class="font-bold text-blue-900 mb-4">Nilai Kelompok</h3>
           <div class="overflow-x-auto rounded-xl border border-gray-200">
             <table class="w-full text-sm">
               <thead class="bg-blue-600 text-white" id="kelompok-score-thead"></thead>
@@ -430,6 +441,8 @@
                 <th class="px-2 py-3 text-left text-xs font-bold">Kelas</th>
                 <th class="px-2 py-3 text-center text-xs font-bold">SIKAP</th>
                 <th class="px-2 py-3 text-center text-xs font-bold">Predikat</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Akd Smt 1</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Akd Smt 2</th>
                 <th class="px-2 py-3 text-center text-xs font-bold">Akademik</th>
                 <th class="px-2 py-3 text-center text-xs font-bold">Predikat</th>
                 <th class="px-2 py-3 text-center text-xs font-bold">Kelompok</th>
@@ -443,7 +456,7 @@
           <div class="text-6xl mb-4">📊</div>
           <p class="text-gray-600 font-semibold">Belum ada data untuk direkap</p>
         </div>
-        <p class="text-xs text-gray-500 mt-3">Merah = di bawah KKM (Akademik & Kelompok — kelas X: 75, XI: 79, XII: 80). Nilai SIKAP tidak memakai KKM. Nilai SIKAP & Akademik = akumulasi seluruh pertemuan. Excel berisi 4 sheet.</p>
+        <p class="text-xs text-gray-500 mt-3">Merah = di bawah KKM (Akademik & Kelompok — kelas X: 75, XI: 79, XII: 80). Nilai SIKAP otomatis menjadi komponen Asesmen Harian. Excel berisi 4 sheet.</p>
       </div>
     </div>
   </div>
@@ -471,7 +484,7 @@
     subject_name: 'Matematika',
     auth: { username: 'admin', password: 'admin123' },
     kkm: 75,
-    kkm_map: { X: 75, XI: 79, XII: 80 },      // KKM Akademik per jenjang
+    kkm_map: { X: 75, XI: 79, XII: 80 },
     bobot: { tugas: 0.35, ah: 0.35, pts: 0.20, psas: 0.10 }
   };
 
@@ -493,11 +506,7 @@
   const TUGAS_FIELDS = ['tugas1','tugas2','tugas3','tugas4','tugas5','tugas6'];
   const AH_FIELDS = ['ah1','ah2','ah3'];
   const AKADEMIK_FIELDS = [...TUGAS_FIELDS, ...AH_FIELDS, 'pts', 'psas'];
-  const FIELD_LABELS = {};
-  TUGAS_FIELDS.forEach((f, i) => FIELD_LABELS[f] = 'Tugas ' + (i+1));
-  AH_FIELDS.forEach((f, i) => FIELD_LABELS[f] = 'AH ' + (i+1));
-  FIELD_LABELS['pts'] = 'PTS';
-  FIELD_LABELS['psas'] = 'PSAS';
+  const SEMESTERS = [1, 2];
 
   const STORAGE_KEY = 'kaciw_penilaian_cache_v6';
   const OLD_KEYS = ['kaciw_penilaian_data_v2', 'kaciw_penilaian_data_v1', 'kaciw_penilaian_cache_v5'];
@@ -512,28 +521,21 @@
   };
 
   // ================= STATE =================
-  let allData = { students: [], pertemuan: { sikap: [], akademik: [] }, kelompok: { groups: [], penilaian: [] } };
+  let allData = { students: [], pertemuan: { sikap: [] }, akademik_semester: [], kelompok: { groups: [], penilaian: [] } };
   let deleteTarget = null;
   let editGroupId = null;
+  const editRowId = { sikap: null, akademik: null, kelompok: null };
 
-  // ================= KONEKSI SUPABASE =================
+  // ================= KONEKSI & SYNC SUPABASE =================
   function connectSupabase() {
-    try {
-      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      return true;
-    } catch (e) {
-      console.error('Client gagal dibuat', e);
-      return false;
-    }
+    try { supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); return true; }
+    catch (e) { console.error('Client gagal dibuat', e); return false; }
   }
-
-  // ================= SYNC (siluman — tanpa tampilan) =================
   let syncState = 'idle';
   let saveTimer = null;
   let isSyncing = false;
   let pendingSync = false;
-
-  function setSyncStatus(status) { syncState = status; }   // tidak ada indikator di layar
+  function setSyncStatus(status) { syncState = status; }
 
   function saveData() {
     store.set(STORAGE_KEY, JSON.stringify(allData));
@@ -558,9 +560,7 @@
           setSyncStatus('offline');
           showToast('❗ Tabel "penilaian_data" belum dibuat di Supabase.');
         } else { throw error; }
-      } else {
-        setSyncStatus('saved');
-      }
+      } else { setSyncStatus('saved'); }
     } catch (e) {
       console.error('Sync gagal:', e);
       setSyncStatus('offline');
@@ -571,19 +571,60 @@
   }
 
   function normalizeData(d) {
-    const nd = { students: [], pertemuan: { sikap: [], akademik: [] }, kelompok: { groups: [], penilaian: [] } };
+    const nd = { students: [], pertemuan: { sikap: [] }, akademik_semester: [], kelompok: { groups: [], penilaian: [] } };
     if (!d) return nd;
     if (Array.isArray(d.students)) nd.students = d.students;
-    if (d.pertemuan) {
-      if (Array.isArray(d.pertemuan.sikap)) nd.pertemuan.sikap = d.pertemuan.sikap;
-      if (Array.isArray(d.pertemuan.akademik)) nd.pertemuan.akademik = d.pertemuan.akademik;
-    }
+    if (d.pertemuan && Array.isArray(d.pertemuan.sikap)) nd.pertemuan.sikap = d.pertemuan.sikap;
+    if (Array.isArray(d.akademik_semester)) nd.akademik_semester = d.akademik_semester.filter(r => r && r.class);
     if (d.kelompok) {
       if (Array.isArray(d.kelompok.groups)) nd.kelompok.groups = d.kelompok.groups;
       if (Array.isArray(d.kelompok.penilaian)) nd.kelompok.penilaian = d.kelompok.penilaian;
     }
+
+    if (!nd.pertemuan.sikap.length && Array.isArray(d.sikap)) {
+      const byClass = {};
+      d.sikap.forEach(r => {
+        const st = nd.students.find(s => s.id === r.student_id);
+        if (!st) return;
+        const sc = {};
+        SIKAP_ASPECTS.forEach(a => { const v = numOf(r[a.key]); if (v !== null) sc[a.key] = v; });
+        if (Object.keys(sc).length) {
+          if (!byClass[st.student_class]) byClass[st.student_class] = {};
+          byClass[st.student_class][r.student_id] = sc;
+        }
+      });
+      Object.keys(byClass).forEach(cls => {
+        nd.pertemuan.sikap.push({ id: generateId(), class: cls, no: 1, created_at: new Date().toISOString(), scores: byClass[cls] });
+      });
+    }
+
+    if (!nd.akademik_semester.length) {
+      const merged = {};
+      const absorb = (cls, sid, fields) => {
+        if (!cls || !sid || !fields) return;
+        if (!merged[cls]) merged[cls] = {};
+        if (!merged[cls][sid]) merged[cls][sid] = {};
+        AKADEMIK_FIELDS.forEach(f => { const v = numOf(fields[f]); if (v !== null) merged[cls][sid][f] = v; });
+      };
+      if (d.pertemuan && Array.isArray(d.pertemuan.akademik)) {
+        d.pertemuan.akademik.forEach(p => {
+          if (!p || !p.scores) return;
+          Object.keys(p.scores).forEach(sid => absorb(p.class, sid, p.scores[sid]));
+        });
+      }
+      if (Array.isArray(d.akademik)) {
+        d.akademik.forEach(r => {
+          const st = nd.students.find(s => s.id === r.student_id);
+          absorb(st ? st.student_class : r.student_class, r.student_id, r);
+        });
+      }
+      Object.keys(merged).forEach(cls => {
+        nd.akademik_semester.push({ id: generateId(), class: cls, semester: 1, scores: merged[cls] });
+      });
+    }
+
     nd.pertemuan.sikap.forEach(p => { if (!p.scores) p.scores = {}; });
-    nd.pertemuan.akademik.forEach(p => { if (!p.scores) p.scores = {}; });
+    nd.akademik_semester.forEach(r => { if (!r.scores) r.scores = {}; r.semester = Number(r.semester) || 1; });
     return nd;
   }
 
@@ -603,13 +644,18 @@
         throw error;
       }
       if (data && data.data) {
-        allData = normalizeData(data.data);
+        const raw = data.data;
+        const hadLegacy = (raw.pertemuan && Array.isArray(raw.pertemuan.akademik) && raw.pertemuan.akademik.length > 0) ||
+                          (Array.isArray(raw.akademik) && raw.akademik.length > 0) ||
+                          (Array.isArray(raw.sikap) && raw.sikap.length > 0);
+        allData = normalizeData(raw);
         store.set(STORAGE_KEY, JSON.stringify(allData));
         setSyncStatus('saved');
+        if (hadLegacy) saveData();
         return true;
       }
       const hasLocal = allData.students.length || allData.pertemuan.sikap.length ||
-                       allData.pertemuan.akademik.length || allData.kelompok.groups.length;
+                       allData.akademik_semester.length || allData.kelompok.groups.length;
       if (hasLocal) { await syncToSupabase(); }
       else { setSyncStatus('saved'); }
       return true;
@@ -619,7 +665,6 @@
     }
   }
 
-  // Flush data saat aplikasi disembunyikan/ditutup (penting di tablet)
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden' && syncState === 'saving' && supabaseClient) {
       if (saveTimer) clearTimeout(saveTimer);
@@ -641,7 +686,7 @@
 
     const b = CONFIG.bobot;
     document.getElementById('akademik-info').innerHTML =
-      `ℹ️ Input <b>per pertemuan</b> — isi hanya penilaian yang diberikan pada pertemuan itu (kosongkan sisanya).<br>📊 Akumulasi menggabungkan nilai dari seluruh pertemuan. <b>Nilai Akhir = ${(b.tugas*100)}% Rata Tugas + ${(b.ah*100)}% Rata AH + ${(b.pts*100)}% PTS + ${(b.psas*100)}% PSAS</b>.<br>🎯 <b>KKM Akademik: Kelas X = 75, XI = 79, XII = 80</b>.<br>☁️ Tersimpan otomatis ke Supabase.`;
+      `ℹ️ Pilih semester — baris <b>belum ada nilai</b> langsung bisa diisi, baris <b>sudah ada nilai</b> klik ✏️ untuk ubah.<br>⭐ Kolom <b>SIKAP</b> terisi otomatis dari menu Penilaian SIKAP dan <b>masuk ke rata-rata Asesmen Harian</b>.<br>📊 <b>NA per Semester = ${(b.tugas*100)}% Rata Tugas + ${(b.ah*100)}% Rata AH (termasuk SIKAP) + ${(b.pts*100)}% PTS + ${(b.psas*100)}% PSAS</b>. Nilai Akhir (Gabungan) = rata-rata NA semester yang terisi.<br>🎯 KKM: X = 75, XI = 79, XII = 80. ☁️ Tersimpan otomatis.`;
 
     const classSel = document.getElementById('input-student-class');
     if (classSel) classSel.innerHTML = '<option value="">Pilih Kelas</option>' + CLASS_LIST.map(c => `<option value="${c}">${c}</option>`).join('');
@@ -656,7 +701,6 @@
 
     loadKopImage().catch(e => console.warn('KOP tidak tersedia', e));
 
-    // Koneksi langsung (key tertanam) → muat data cloud
     if (connectSupabase()) {
       loadCloudData().then(ok => {
         if (ok) {
@@ -674,45 +718,7 @@
     let raw = store.get(STORAGE_KEY);
     if (!raw) raw = OLD_KEYS.map(k => store.get(k)).find(v => v);
     if (!raw) return;
-    const parsed = JSON.parse(raw);
-    allData = normalizeData(parsed);
-
-    const alreadyPertemuan = parsed.pertemuan && Array.isArray(parsed.pertemuan.sikap);
-    if (!alreadyPertemuan) {
-      allData.pertemuan = { sikap: [], akademik: [] };
-      if (Array.isArray(parsed.sikap)) {
-        const byClass = {};
-        parsed.sikap.forEach(r => {
-          const st = allData.students.find(s => s.id === r.student_id);
-          if (!st) return;
-          const sc = {};
-          SIKAP_ASPECTS.forEach(a => { const v = numOf(r[a.key]); if (v !== null) sc[a.key] = v; });
-          if (Object.keys(sc).length) {
-            if (!byClass[st.student_class]) byClass[st.student_class] = {};
-            byClass[st.student_class][r.student_id] = sc;
-          }
-        });
-        Object.keys(byClass).forEach(cls => {
-          allData.pertemuan.sikap.push({ id: generateId(), class: cls, no: 1, created_at: new Date().toISOString(), scores: byClass[cls] });
-        });
-      }
-      if (Array.isArray(parsed.akademik)) {
-        const byClass = {};
-        parsed.akademik.forEach(r => {
-          const st = allData.students.find(s => s.id === r.student_id);
-          if (!st) return;
-          const sc = {};
-          AKADEMIK_FIELDS.forEach(f => { const v = numOf(r[f]); if (v !== null) sc[f] = v; });
-          if (Object.keys(sc).length) {
-            if (!byClass[st.student_class]) byClass[st.student_class] = {};
-            byClass[st.student_class][r.student_id] = sc;
-          }
-        });
-        Object.keys(byClass).forEach(cls => {
-          allData.pertemuan.akademik.push({ id: generateId(), class: cls, no: 1, created_at: new Date().toISOString(), scores: byClass[cls] });
-        });
-      }
-    }
+    try { allData = normalizeData(JSON.parse(raw)); } catch (e) { console.error(e); }
   }
 
   async function loadKopImage() {
@@ -753,18 +759,13 @@
     const r = round1(n);
     return Number.isInteger(r) ? String(r) : r.toFixed(1);
   }
-
-  // ===== KKM PER JENJANG =====
   function getGradeLevel(className) {
     const c = String(className || '').trim().toUpperCase();
     if (c.startsWith('XII')) return 'XII';
     if (c.startsWith('XI')) return 'XI';
     return 'X';
   }
-  function getKKM(className) {
-    return CONFIG.kkm_map[getGradeLevel(className)] ?? CONFIG.kkm;
-  }
-
+  function getKKM(className) { return CONFIG.kkm_map[getGradeLevel(className)] ?? CONFIG.kkm; }
   function nilaiCellHtml(nilai, kkm) {
     if (nilai === null || nilai === undefined) return '<span class="text-gray-400">-</span>';
     if (kkm === null || kkm === undefined) {
@@ -785,9 +786,8 @@
     return st;
   }
 
-  // ================= PERTEMUAN & RUMUS =================
+  // ================= RUMUS =================
   function getSikapPertemuans(cls) { return allData.pertemuan.sikap.filter(p => p.class === cls).sort((a, b) => a.no - b.no); }
-  function getAkadPertemuans(cls) { return allData.pertemuan.akademik.filter(p => p.class === cls).sort((a, b) => a.no - b.no); }
   function nextPertemuanNo(list) { return list.length ? Math.max(...list.map(p => p.no || 0)) + 1 : 1; }
 
   function predikatSikap(nilai) {
@@ -820,27 +820,33 @@
     if (!vals.length) return null;
     return round1(vals.reduce((a, b) => a + b, 0) / vals.length);
   }
-  function getAkademikFields(studentId, cls) {
-    const merged = {};
-    AKADEMIK_FIELDS.forEach(f => merged[f] = null);
-    getAkadPertemuans(cls).forEach(p => {
-      const sc = p.scores[studentId];
-      if (!sc) return;
-      AKADEMIK_FIELDS.forEach(f => { const v = numOf(sc[f]); if (v !== null) merged[f] = v; });
-    });
-    return merged;
+
+  function getAkadRec(cls, sem) {
+    return allData.akademik_semester.find(r => r.class === cls && Number(r.semester) === Number(sem)) || null;
+  }
+  function ensureAkadRec(cls, sem) {
+    let rec = getAkadRec(cls, sem);
+    if (!rec) {
+      rec = { id: generateId(), class: cls, semester: Number(sem), scores: {} };
+      allData.akademik_semester.push(rec);
+    }
+    return rec;
   }
   function avgOf(rec, fields) {
     const vals = fields.map(f => numOf(rec[f])).filter(v => v !== null);
     if (!vals.length) return null;
     return vals.reduce((a, b) => a + b, 0) / vals.length;
   }
-  function hitungAkademik(rec) {
-    const res = { rataTugas: null, rataAH: null, nilai: null, predikat: '-' };
-    if (!rec) return res;
-    res.rataTugas = avgOf(rec, TUGAS_FIELDS);
-    res.rataAH = avgOf(rec, AH_FIELDS);
-    const pts = numOf(rec.pts), psas = numOf(rec.psas);
+  // ===== AH TERMASUK NILAI SIKAP =====
+  function hitungAkademik(sc, sikapScore) {
+    const res = { rataTugas: null, rataAH: null, nilai: null, predikat: '-', sikap: null };
+    if (!sc) sc = {};
+    res.sikap = numOf(sikapScore);
+    res.rataTugas = avgOf(sc, TUGAS_FIELDS);
+    const ahVals = AH_FIELDS.map(f => numOf(sc[f])).filter(v => v !== null);
+    if (res.sikap !== null) ahVals.push(res.sikap);
+    res.rataAH = ahVals.length ? ahVals.reduce((a, b) => a + b, 0) / ahVals.length : null;
+    const pts = numOf(sc.pts), psas = numOf(sc.psas);
     const parts = [];
     if (res.rataTugas !== null) parts.push({ v: res.rataTugas, w: CONFIG.bobot.tugas });
     if (res.rataAH !== null)    parts.push({ v: res.rataAH,    w: CONFIG.bobot.ah });
@@ -852,7 +858,17 @@
     res.predikat = predikatAkademik(res.nilai);
     return res;
   }
-  function hitungAkademikFinal(studentId, cls) { return hitungAkademik(getAkademikFields(studentId, cls)); }
+  function hitungAkademikSemester(studentId, cls, sem) {
+    const rec = getAkadRec(cls, sem);
+    const sc = (rec && rec.scores[studentId]) || {};
+    const sikapScore = hitungSikapFinal(studentId, cls);
+    return hitungAkademik(sc, sikapScore);
+  }
+  function hitungAkademikFinal(studentId, cls) {
+    const vals = SEMESTERS.map(sem => hitungAkademikSemester(studentId, cls, sem).nilai).filter(v => v !== null);
+    if (!vals.length) return null;
+    return round1(vals.reduce((a, b) => a + b, 0) / vals.length);
+  }
 
   // ================= NAVIGASI =================
   const PAGES = ['manajemen-siswa','penilaian-sikap','penilaian-akademik','penilaian-kelompok','rekap-nilai'];
@@ -924,12 +940,12 @@
   // ================= DASHBOARD =================
   function updateDashboard() {
     const sFinals = allData.students.map(s => hitungSikapFinal(s.id, s.student_class)).filter(v => v !== null);
-    const aFinals = allData.students.map(s => hitungAkademikFinal(s.id, s.student_class).nilai).filter(v => v !== null);
+    const aFinals = allData.students.map(s => hitungAkademikFinal(s.id, s.student_class)).filter(v => v !== null);
     const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
     set('dashboard-total-students', allData.students.length);
     set('dashboard-total-classes', new Set(allData.students.map(s => s.student_class)).size);
     set('dashboard-total-groups', allData.kelompok.groups.length);
-    set('dashboard-total-pertemuan', allData.pertemuan.sikap.length + allData.pertemuan.akademik.length);
+    set('dashboard-total-pertemuan', allData.pertemuan.sikap.length);
     set('dashboard-sikap-done', sFinals.length);
     set('dashboard-akademik-done', aFinals.length);
     set('dashboard-rata-sikap', sFinals.length ? fmtNilai(round1(sFinals.reduce((a,b)=>a+b,0)/sFinals.length)) : '-');
@@ -1030,25 +1046,50 @@
         tbody.innerHTML = students.map((s, i) => {
           const sc = (pRec && pRec.scores[s.id]) || {};
           const c = hitungSikapPertemuan(sc);
+          const hasData = sc && SIKAP_ASPECTS.some(a => numOf(sc[a.key]) !== null);
+          const isEdit = editRowId.sikap === s.id;
+          const dis = (hasData && !isEdit) ? 'disabled' : '';
           const cells = SIKAP_ASPECTS.map(a => {
             const v = sc ? sc[a.key] : null;
             const opts = [''].concat([1,2,3,4,5]).map(o => {
               const isSel = o === '' ? (v === null || v === undefined || v === '') : String(v) === String(o);
               return `<option value="${o}" ${isSel ? 'selected' : ''}>${o === '' ? '-' : o}</option>`;
             }).join('');
-            return `<td class="px-2 py-2 text-center"><select onchange="onSikapChange('${s.id}')" data-student="${s.id}" data-key="${a.key}" class="sikap-select">${opts}</select></td>`;
+            return `<td class="px-2 py-2 text-center"><select ${dis} onchange="onSikapChange('${s.id}')" data-student="${s.id}" data-key="${a.key}" class="sikap-select">${opts}</select></td>`;
           }).join('');
-          return `<tr class="border-b border-gray-100 hover:bg-blue-50 transition-colors">
+          const aksi = isEdit
+            ? `<button onclick="saveSikapRow('${s.id}')" class="btn-row-save" title="Simpan baris ini">💾</button>`
+            : (hasData ? `<button onclick="editSikapRow('${s.id}')" class="btn-row-edit" title="Ubah nilai baris ini">✏️</button>` : '');
+          return `<tr class="border-b border-gray-100 hover:bg-blue-50 transition-colors ${isEdit ? 'row-editing' : ''}">
             <td class="px-2 py-2 text-gray-600">${i+1}</td>
             <td class="px-3 py-2 font-semibold text-gray-900 whitespace-nowrap">${escapeHtml(s.student_name)}</td>
             ${cells}
             <td class="px-2 py-2 text-center font-bold text-gray-800" id="sikap-total-${s.id}">${c.nilai === null ? '-' : c.total}</td>
             <td class="px-2 py-2 text-center" id="sikap-nilai-${s.id}">${nilaiCellHtml(c.nilai, null)}</td>
+            <td class="px-2 py-2 text-center">${aksi}</td>
           </tr>`;
         }).join('');
       }
     }
     renderSikapAkumulasi(cls);
+  }
+  function editSikapRow(studentId) {
+    editRowId.sikap = studentId;
+    renderSikap();
+    showToast('✏️ Baris terbuka — ubah skor lalu klik 💾');
+  }
+  function saveSikapRow(studentId) {
+    const pid = document.getElementById('select-sikap-pertemuan').value;
+    const p = allData.pertemuan.sikap.find(x => x.id === pid);
+    if (p) {
+      if (!p.scores[studentId]) p.scores[studentId] = {};
+      document.querySelectorAll(`select.sikap-select[data-student="${studentId}"]`).forEach(sel => {
+        p.scores[studentId][sel.dataset.key] = sel.value === '' ? null : Number(sel.value);
+      });
+    }
+    editRowId.sikap = null;
+    saveData(); renderSikap(); renderAkademik(); updateDashboard();
+    showToast('✅ Nilai tersimpan & terkunci ☁️');
   }
   function onSikapChange(studentId) {
     const cls = document.getElementById('select-sikap-class').value;
@@ -1064,6 +1105,8 @@
     document.getElementById(`sikap-nilai-${studentId}`).innerHTML = nilaiCellHtml(c.nilai, null);
     saveData();
     renderSikapAkumulasi(cls);
+    renderAkademik();
+    renderRekapNilai();
     updateDashboard();
   }
   function renderSikapAkumulasi(cls) {
@@ -1119,109 +1162,124 @@
   // ================= PENILAIAN AKADEMIK =================
   function renderAkademik() {
     const cls = document.getElementById('select-akademik-class').value;
-    const pertList = cls ? getAkadPertemuans(cls) : [];
-    const selP = document.getElementById('select-akademik-pertemuan');
-    const curP = selP.value;
-    selP.innerHTML = pertList.length
-      ? pertList.map(p => `<option value="${p.id}">Pertemuan ${p.no}</option>`).join('')
-      : '<option value="">- Belum ada pertemuan -</option>';
-    if (pertList.some(p => p.id === curP)) selP.value = curP;
-    else if (pertList.length) selP.value = pertList[pertList.length - 1].id;
-
+    const sem = Number(document.getElementById('select-akademik-semester').value) || 1;
     const tbody = document.getElementById('akademik-table-body');
     const empty = document.getElementById('akademik-empty-state');
     const emptyText = document.getElementById('akademik-empty-text');
-    const pid = selP.value;
-    const pRec = pid ? allData.pertemuan.akademik.find(p => p.id === pid) : null;
 
     if (!cls) { tbody.innerHTML = ''; emptyText.textContent = 'Pilih kelas untuk mulai menilai'; empty.classList.remove('hidden'); }
-    else if (!pertList.length) { tbody.innerHTML = ''; emptyText.textContent = 'Belum ada pertemuan. Klik "+ Pertemuan" untuk membuat.'; empty.classList.remove('hidden'); }
     else {
-      empty.classList.add('hidden');
       const students = allData.students.filter(s => s.student_class === cls).sort(byName);
       if (!students.length) { tbody.innerHTML = ''; emptyText.textContent = 'Belum ada siswa di kelas ' + cls; empty.classList.remove('hidden'); }
       else {
+        empty.classList.add('hidden');
+        const rec = getAkadRec(cls, sem);
+        const kkm = getKKM(cls);
         tbody.innerHTML = students.map((s, i) => {
-          const sc = (pRec && pRec.scores[s.id]) || {};
+          const sc = (rec && rec.scores[s.id]) || {};
+          const sikapVal = hitungSikapFinal(s.id, cls);
+          const c = hitungAkademik(sc, sikapVal);
+          const hasData = sc && AKADEMIK_FIELDS.some(f => numOf(sc[f]) !== null);
+          const isEdit = editRowId.akademik === s.id;
+          const dis = (hasData && !isEdit) ? 'disabled' : '';
           const numCell = f => {
             const v = sc ? sc[f] : null;
-            return `<td class="px-1 py-2 text-center"><input type="number" min="0" max="100" inputmode="numeric" value="${v ?? ''}" onchange="onAkademikChange('${s.id}')" data-student="${s.id}" data-key="${f}" class="akad-input"></td>`;
+            return `<td class="px-1 py-2 text-center"><input type="number" min="0" max="100" inputmode="numeric" ${dis} value="${v ?? ''}" onchange="onAkademikChange('${s.id}')" data-student="${s.id}" data-key="${f}" class="akad-input"></td>`;
           };
-          return `<tr class="border-b border-gray-100 hover:bg-blue-50 transition-colors">
+          const aksi = isEdit
+            ? `<button onclick="saveAkademikRow('${s.id}')" class="btn-row-save" title="Simpan baris ini">💾</button>`
+            : (hasData ? `<button onclick="editAkademikRow('${s.id}')" class="btn-row-edit" title="Ubah nilai baris ini">✏️</button>` : '');
+          return `<tr class="border-b border-gray-100 hover:bg-blue-50 transition-colors ${isEdit ? 'row-editing' : ''}">
             <td class="px-2 py-2 text-gray-600">${i+1}</td>
             <td class="px-3 py-2 font-semibold text-gray-900 whitespace-nowrap">${escapeHtml(s.student_name)}</td>
             ${TUGAS_FIELDS.map(numCell).join('')}
             ${AH_FIELDS.map(numCell).join('')}
+            <td class="px-2 py-2 text-center"><div class="sikap-auto">${sikapVal === null ? '-' : fmtNilai(sikapVal)}</div></td>
             ${numCell('pts')}
             ${numCell('psas')}
+            <td class="px-2 py-2 text-center bg-blue-50" id="akad-na-${s.id}">${nilaiCellHtml(c.nilai, kkm)}</td>
+            <td class="px-2 py-2 text-center">${aksi}</td>
           </tr>`;
         }).join('');
       }
     }
-    renderAkademikAkumulasi(cls);
+    renderAkademikRekap(cls);
   }
-  function onAkademikChange(studentId) {
+  function editAkademikRow(studentId) {
+    editRowId.akademik = studentId;
+    renderAkademik();
+    showToast('✏️ Baris terbuka — ubah nilai lalu klik 💾');
+  }
+  function saveAkademikRow(studentId) {
     const cls = document.getElementById('select-akademik-class').value;
-    const pid = document.getElementById('select-akademik-pertemuan').value;
-    const p = allData.pertemuan.akademik.find(x => x.id === pid);
-    if (!p) return;
-    if (!p.scores[studentId]) p.scores[studentId] = {};
+    const sem = Number(document.getElementById('select-akademik-semester').value) || 1;
+    if (!cls) return;
+    const rec = ensureAkadRec(cls, sem);
+    if (!rec.scores[studentId]) rec.scores[studentId] = {};
     document.querySelectorAll(`input.akad-input[data-student="${studentId}"]`).forEach(inp => {
       const f = inp.dataset.key;
-      if (inp.value === '') { if (numOf(p.scores[studentId][f]) !== null) delete p.scores[studentId][f]; return; }
+      if (inp.value === '') { if (numOf(rec.scores[studentId][f]) !== null) delete rec.scores[studentId][f]; return; }
       let n = Number(inp.value);
       if (isNaN(n)) { inp.value = ''; return; }
       n = Math.max(0, Math.min(100, n));
       inp.value = String(n);
-      p.scores[studentId][f] = n;
+      rec.scores[studentId][f] = n;
     });
+    editRowId.akademik = null;
+    saveData(); renderAkademik(); updateDashboard();
+    showToast('✅ Nilai tersimpan & terkunci ☁️');
+  }
+  function onAkademikChange(studentId) {
+    const cls = document.getElementById('select-akademik-class').value;
+    const sem = Number(document.getElementById('select-akademik-semester').value) || 1;
+    if (!cls) return;
+    const rec = ensureAkadRec(cls, sem);
+    if (!rec.scores[studentId]) rec.scores[studentId] = {};
+    document.querySelectorAll(`input.akad-input[data-student="${studentId}"]`).forEach(inp => {
+      const f = inp.dataset.key;
+      if (inp.value === '') { if (numOf(rec.scores[studentId][f]) !== null) delete rec.scores[studentId][f]; return; }
+      let n = Number(inp.value);
+      if (isNaN(n)) { inp.value = ''; return; }
+      n = Math.max(0, Math.min(100, n));
+      inp.value = String(n);
+      rec.scores[studentId][f] = n;
+    });
+    const c = hitungAkademik(rec.scores[studentId] || {}, hitungSikapFinal(studentId, cls));
+    const el = document.getElementById(`akad-na-${studentId}`);
+    if (el) el.innerHTML = nilaiCellHtml(c.nilai, getKKM(cls));
     saveData();
-    renderAkademikAkumulasi(cls);
+    renderAkademikRekap(cls);
     updateDashboard();
   }
-  function renderAkademikAkumulasi(cls) {
+  function renderAkademikRekap(cls) {
     const tbody = document.getElementById('akademik-akum-body');
     const empty = document.getElementById('akademik-akum-empty');
     document.getElementById('akademik-akum-class').textContent = cls ? `(Kelas ${cls})` : '';
     if (!cls) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
     const students = allData.students.filter(s => s.student_class === cls).sort(byName);
-    const any = students.some(s => { const m = getAkademikFields(s.id, cls); return AKADEMIK_FIELDS.some(f => m[f] !== null); });
+    const any = students.some(s => SEMESTERS.some(sem => hitungAkademikSemester(s.id, cls, sem).nilai !== null));
     if (!students.length || !any) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
     empty.classList.add('hidden');
     const kkm = getKKM(cls);
     tbody.innerHTML = students.map((s, i) => {
-      const m = getAkademikFields(s.id, cls);
-      const c = hitungAkademik(m);
-      const cell = f => `<td class="px-1 py-2 text-center text-gray-700">${m[f] === null ? '-' : fmtNilai(m[f])}</td>`;
+      const s1 = hitungAkademikSemester(s.id, cls, 1).nilai;
+      const s2 = hitungAkademikSemester(s.id, cls, 2).nilai;
+      const fin = hitungAkademikFinal(s.id, cls);
       return `<tr class="border-b border-gray-100 hover:bg-emerald-50 transition-colors">
         <td class="px-2 py-2 text-gray-600">${i+1}</td>
         <td class="px-3 py-2 font-semibold text-gray-900 whitespace-nowrap">${escapeHtml(s.student_name)}</td>
-        ${TUGAS_FIELDS.map(cell).join('')}
-        <td class="px-2 py-2 text-center font-bold text-emerald-700 bg-emerald-50">${c.rataTugas === null ? '-' : fmtNilai(c.rataTugas)}</td>
-        ${AH_FIELDS.map(cell).join('')}
-        <td class="px-2 py-2 text-center font-bold text-emerald-700 bg-emerald-50">${c.rataAH === null ? '-' : fmtNilai(c.rataAH)}</td>
-        ${cell('pts')}
-        ${cell('psas')}
-        <td class="px-2 py-2 text-center bg-emerald-50">${nilaiCellHtml(c.nilai, kkm)}</td>
-        <td class="px-2 py-2 text-center text-xs bg-emerald-50">${predikatBadge(c.predikat)}</td>
+        <td class="px-2 py-2 text-center">${nilaiCellHtml(s1, kkm)}</td>
+        <td class="px-2 py-2 text-center">${nilaiCellHtml(s2, kkm)}</td>
+        <td class="px-2 py-2 text-center bg-emerald-50">${nilaiCellHtml(fin, kkm)}</td>
+        <td class="px-2 py-2 text-center text-xs bg-emerald-50">${predikatBadge(fin === null ? '-' : predikatAkademik(fin))}</td>
       </tr>`;
     }).join('');
   }
-  function addAkademikPertemuan() {
+  function confirmResetAkademik() {
     const cls = document.getElementById('select-akademik-class').value;
     if (!cls) { showToast('Pilih kelas terlebih dahulu'); return; }
-    const no = nextPertemuanNo(getAkadPertemuans(cls));
-    allData.pertemuan.akademik.push({ id: generateId(), class: cls, no, created_at: new Date().toISOString(), scores: {} });
-    saveData(); renderAkademik(); updateDashboard();
-    showToast(`Pertemuan ${no} (Akademik) ditambahkan ☁️`);
-  }
-  function confirmDeleteAkademikPertemuan() {
-    const cls = document.getElementById('select-akademik-class').value;
-    const pid = document.getElementById('select-akademik-pertemuan').value;
-    if (!cls || !pid) { showToast('Pilih kelas & pertemuan terlebih dahulu'); return; }
-    const p = allData.pertemuan.akademik.find(x => x.id === pid);
-    deleteTarget = { type: 'akademik_pertemuan', id: pid };
-    openConfirm(`Hapus Akademik Pertemuan ${p ? p.no : ''} kelas ${cls}?`);
+    deleteTarget = { type: 'reset_akademik', className: cls };
+    openConfirm(`Hapus SEMUA nilai Akademik (Semester 1 & 2) kelas ${cls}? (Nilai SIKAP tidak terhapus)`);
   }
 
   // ================= PENILAIAN KELOMPOK =================
@@ -1294,22 +1352,43 @@
           <button onclick="confirmDeletePenilaian('${p.id}')" class="text-red-300 hover:text-red-100 text-xs mt-0.5 font-bold" title="Hapus penilaian ini">✕ hapus</button>
         </div></th>`;
     });
-    head += `<th class="px-2 py-2 text-center text-xs font-bold">Rata-rata</th></tr>`;
+    head += `<th class="px-2 py-2 text-center text-xs font-bold">Rata-rata</th>
+      <th class="px-2 py-2 text-center text-xs font-bold">Aksi</th></tr>`;
     thead.innerHTML = head;
 
     const kkm = getKKM(cls);
     tbody.innerHTML = groups.map(g => {
+      const hasData = penilaians.some(p => p.scores && numOf(p.scores[g.id]) !== null);
+      const isEdit = editRowId.kelompok === g.id;
+      const dis = (hasData && !isEdit) ? 'disabled' : '';
       const cells = penilaians.map(p => {
         const v = p.scores ? p.scores[g.id] : null;
-        return `<td class="px-2 py-2 text-center"><input type="number" min="0" max="100" inputmode="numeric" value="${v ?? ''}" onchange="onKelompokScoreChange('${g.id}','${p.id}')" data-group="${g.id}" data-penilaian="${p.id}" class="kelompok-input"></td>`;
+        return `<td class="px-2 py-2 text-center"><input type="number" min="0" max="100" inputmode="numeric" ${dis} value="${v ?? ''}" onchange="onKelompokScoreChange('${g.id}','${p.id}')" data-group="${g.id}" data-penilaian="${p.id}" class="kelompok-input"></td>`;
       }).join('');
-      return `<tr class="border-b border-gray-100 hover:bg-blue-50 transition-colors">
+      const aksi = isEdit
+        ? `<button onclick="saveKelompokRow('${g.id}')" class="btn-row-save" title="Simpan baris ini">💾</button>`
+        : (hasData ? `<button onclick="editKelompokRow('${g.id}')" class="btn-row-edit" title="Ubah nilai baris ini">✏️</button>` : '');
+      return `<tr class="border-b border-gray-100 hover:bg-blue-50 transition-colors ${isEdit ? 'row-editing' : ''}">
         <td class="px-3 py-2 font-semibold text-gray-900 whitespace-nowrap">${escapeHtml(g.name)}</td>
         <td class="px-3 py-2 text-center text-xs text-gray-500">${g.members.length} siswa</td>
         ${cells}
         <td class="px-2 py-2 text-center" id="kelompok-rata-${g.id}">${nilaiCellHtml(getGroupAvg(g.id), kkm)}</td>
+        <td class="px-2 py-2 text-center">${aksi}</td>
       </tr>`;
     }).join('');
+  }
+  function editKelompokRow(groupId) {
+    editRowId.kelompok = groupId;
+    renderKelompok();
+    showToast('✏️ Baris kelompok terbuka — ubah nilai lalu klik 💾');
+  }
+  function saveKelompokRow(groupId) {
+    document.querySelectorAll(`input.kelompok-input[data-group="${groupId}"]`).forEach(inp => {
+      onKelompokScoreChange(groupId, inp.dataset.penilaian);
+    });
+    editRowId.kelompok = null;
+    saveData(); renderKelompok(); updateDashboard();
+    showToast('✅ Nilai kelompok tersimpan & terkunci ☁️');
   }
   function onKelompokScoreChange(groupId, penilaianId) {
     const p = allData.kelompok.penilaian.find(x => x.id === penilaianId);
@@ -1421,13 +1500,7 @@
     const cls = document.getElementById('select-sikap-class').value;
     if (!cls) { showToast('Pilih kelas terlebih dahulu'); return; }
     deleteTarget = { type: 'reset_sikap', className: cls };
-    openConfirm(`Hapus SEMUA pertemuan SIKAP kelas ${cls}?`);
-  }
-  function confirmResetAkademik() {
-    const cls = document.getElementById('select-akademik-class').value;
-    if (!cls) { showToast('Pilih kelas terlebih dahulu'); return; }
-    deleteTarget = { type: 'reset_akademik', className: cls };
-    openConfirm(`Hapus SEMUA pertemuan Akademik kelas ${cls}?`);
+    openConfirm(`Hapus SEMUA pertemuan SIKAP kelas ${cls}? (nilai akademik ikut berubah karena SIKAP masuk AH)`);
   }
   function confirmResetKelompok() {
     const cls = document.getElementById('select-kelompok-class').value;
@@ -1442,25 +1515,22 @@
       case 'student':
         allData.students = allData.students.filter(s => s.id !== t.id);
         allData.pertemuan.sikap.forEach(p => { if (p.scores) delete p.scores[t.id]; });
-        allData.pertemuan.akademik.forEach(p => { if (p.scores) delete p.scores[t.id]; });
+        allData.akademik_semester.forEach(r => { if (r.scores) delete r.scores[t.id]; });
         allData.kelompok.groups.forEach(g => { g.members = g.members.filter(m => m.id !== t.id); });
         showToast('Siswa & nilainya dihapus'); break;
       case 'all_students':
-        allData = { students: [], pertemuan: { sikap: [], akademik: [] }, kelompok: { groups: [], penilaian: [] } };
+        allData = { students: [], pertemuan: { sikap: [] }, akademik_semester: [], kelompok: { groups: [], penilaian: [] } };
         showToast('Semua data dihapus'); break;
       case 'class_students':
         allData.students = allData.students.filter(s => s.student_class !== t.className);
         allData.pertemuan.sikap = allData.pertemuan.sikap.filter(p => p.class !== t.className);
-        allData.pertemuan.akademik = allData.pertemuan.akademik.filter(p => p.class !== t.className);
+        allData.akademik_semester = allData.akademik_semester.filter(r => r.class !== t.className);
         allData.kelompok.groups = allData.kelompok.groups.filter(g => g.class !== t.className);
         allData.kelompok.penilaian = allData.kelompok.penilaian.filter(p => p.class !== t.className);
         showToast(`Kelas ${t.className} dihapus`); break;
       case 'sikap_pertemuan':
         allData.pertemuan.sikap = allData.pertemuan.sikap.filter(p => p.id !== t.id);
         showToast('Pertemuan SIKAP dihapus'); break;
-      case 'akademik_pertemuan':
-        allData.pertemuan.akademik = allData.pertemuan.akademik.filter(p => p.id !== t.id);
-        showToast('Pertemuan Akademik dihapus'); break;
       case 'group': {
         const gid = t.id;
         allData.kelompok.groups = allData.kelompok.groups.filter(g => g.id !== gid);
@@ -1474,7 +1544,7 @@
         allData.pertemuan.sikap = allData.pertemuan.sikap.filter(p => p.class !== t.className);
         showToast(`Data SIKAP kelas ${t.className} direset`); break;
       case 'reset_akademik':
-        allData.pertemuan.akademik = allData.pertemuan.akademik.filter(p => p.class !== t.className);
+        allData.akademik_semester = allData.akademik_semester.filter(r => r.class !== t.className);
         showToast(`Data Akademik kelas ${t.className} direset`); break;
       case 'reset_kelompok':
         allData.kelompok.groups = allData.kelompok.groups.filter(g => g.class !== t.className);
@@ -1500,7 +1570,9 @@
     tbody.innerHTML = students.map((s, i) => {
       const kkm = getKKM(s.student_class);
       const sikap = hitungSikapFinal(s.id, s.student_class);
-      const akad = hitungAkademikFinal(s.id, s.student_class);
+      const s1 = hitungAkademikSemester(s.id, s.student_class, 1).nilai;
+      const s2 = hitungAkademikSemester(s.id, s.student_class, 2).nilai;
+      const akadNilai = hitungAkademikFinal(s.id, s.student_class);
       const kel = getStudentKelompokScore(s);
       const grp = getStudentGroup(s);
       return `<tr class="border-b border-gray-100 hover:bg-blue-50 transition-colors">
@@ -1509,8 +1581,10 @@
         <td class="px-2 py-2"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">${escapeHtml(s.student_class)}</span></td>
         <td class="px-2 py-2 text-center">${nilaiCellHtml(sikap, null)}</td>
         <td class="px-2 py-2 text-center text-xs">${predikatBadge(sikap === null ? '-' : predikatSikap(sikap))}</td>
-        <td class="px-2 py-2 text-center">${nilaiCellHtml(akad.nilai, kkm)}</td>
-        <td class="px-2 py-2 text-center text-xs">${predikatBadge(akad.predikat)}</td>
+        <td class="px-2 py-2 text-center">${nilaiCellHtml(s1, kkm)}</td>
+        <td class="px-2 py-2 text-center">${nilaiCellHtml(s2, kkm)}</td>
+        <td class="px-2 py-2 text-center">${nilaiCellHtml(akadNilai, kkm)}</td>
+        <td class="px-2 py-2 text-center text-xs">${predikatBadge(akadNilai === null ? '-' : predikatAkademik(akadNilai))}</td>
         <td class="px-2 py-2 text-center">${nilaiCellHtml(kel, kkm)}</td>
         <td class="px-2 py-2 text-center text-xs text-gray-600">${grp ? escapeHtml(grp.name) : '-'}</td>
       </tr>`;
@@ -1527,7 +1601,8 @@
     const aoa = [
       ['PENILAIAN SIKAP — PER PERTEMUAN & AKUMULASI'], [CONFIG.school_name],
       [`Mata Pelajaran: ${CONFIG.subject_name} — Guru: ${CONFIG.teacher_name}`],
-      ['Nilai per pertemuan = (Total Skor/25) x 100. Akumulasi = rata-rata seluruh pertemuan.'], []
+      ['Nilai per pertemuan = (Total Skor/25) x 100. Akumulasi = rata-rata seluruh pertemuan.'],
+      ['Akumulasi SIKAP otomatis menjadi komponen Asesmen Harian di Nilai Akademik.'], []
     ];
     let classes = getClasses();
     if (filterClass) classes = classes.filter(c => c === filterClass);
@@ -1564,39 +1639,42 @@
   function buildAkademikAOA(filterClass) {
     const b = CONFIG.bobot;
     const aoa = [
-      ['PENILAIAN AKADEMIK — PER PERTEMUAN & AKUMULASI'], [CONFIG.school_name],
+      ['PENILAIAN AKADEMIK — PER SEMESTER & GABUNGAN'], [CONFIG.school_name],
       [`Mata Pelajaran: ${CONFIG.subject_name} — Guru: ${CONFIG.teacher_name}`],
-      [`Akumulasi menggabungkan nilai seluruh pertemuan. Nilai Akhir = ${b.tugas*100}% Rata Tugas + ${b.ah*100}% Rata AH + ${b.pts*100}% PTS + ${b.psas*100}% PSAS`],
+      [`Rata AH = rata-rata (AH 1 + AH 2 + AH 3 + Nilai SIKAP). NA per Semester = ${b.tugas*100}% Rata Tugas + ${b.ah*100}% Rata AH + ${b.pts*100}% PTS + ${b.psas*100}% PSAS. Nilai Akhir (Gabungan) = rata-rata NA semester yang terisi.`],
       ['KKM Akademik: Kelas X = 75, XI = 79, XII = 80'], []
     ];
     let classes = getClasses();
     if (filterClass) classes = classes.filter(c => c === filterClass);
-    const relevant = classes.filter(c => getAkadPertemuans(c).length);
-    if (!relevant.length) { aoa.push(['Belum ada data pertemuan Akademik']); return aoa; }
+    const relevant = classes.filter(c => SEMESTERS.some(sem => { const r = getAkadRec(c, sem); return r && Object.keys(r.scores).length; }));
+    if (!relevant.length) { aoa.push(['Belum ada data nilai Akademik']); return aoa; }
     relevant.forEach(cls => {
-      const pert = getAkadPertemuans(cls);
       const students = getSortedStudents(cls);
       const kkm = getKKM(cls);
-      aoa.push([`KELAS ${cls} — AKUMULASI (KKM ${kkm})`]);
-      aoa.push(['No','Nama Siswa','Tugas 1','Tugas 2','Tugas 3','Tugas 4','Tugas 5','Tugas 6','Rata Tugas','AH 1','AH 2','AH 3','Rata AH','PTS','PSAS','Nilai Akhir','Predikat','KKM','Tuntas?']);
+      aoa.push([`KELAS ${cls} — GABUNGAN (KKM ${kkm})`]);
+      aoa.push(['No','Nama Siswa','NA Semester 1','NA Semester 2','Nilai Akhir (Gabungan)','Predikat','KKM','Tuntas?']);
       students.forEach((s, i) => {
-        const m = getAkademikFields(s.id, cls);
-        const c = hitungAkademik(m);
-        aoa.push([i+1, s.student_name,
-          m.tugas1 ?? '', m.tugas2 ?? '', m.tugas3 ?? '', m.tugas4 ?? '', m.tugas5 ?? '', m.tugas6 ?? '', c.rataTugas ?? '',
-          m.ah1 ?? '', m.ah2 ?? '', m.ah3 ?? '', c.rataAH ?? '', m.pts ?? '', m.psas ?? '',
-          c.nilai ?? '', c.nilai === null ? 'Belum Dinilai' : c.predikat, kkm,
-          c.nilai === null ? '-' : (c.nilai >= kkm ? 'Tuntas' : 'Belum Tuntas')]);
+        const s1 = hitungAkademikSemester(s.id, cls, 1).nilai;
+        const s2 = hitungAkademikSemester(s.id, cls, 2).nilai;
+        const fin = hitungAkademikFinal(s.id, cls);
+        aoa.push([i+1, s.student_name, s1 ?? '', s2 ?? '', fin ?? '',
+          fin === null ? 'Belum Dinilai' : predikatAkademik(fin), kkm,
+          fin === null ? '-' : (fin >= kkm ? 'Tuntas' : 'Belum Tuntas')]);
       });
       aoa.push([]);
-      pert.forEach(p => {
-        const usedFields = AKADEMIK_FIELDS.filter(f => students.some(s => p.scores[s.id] && numOf(p.scores[s.id][f]) !== null));
-        if (!usedFields.length) return;
-        aoa.push([`KELAS ${cls} — PERTEMUAN ${p.no}`]);
-        aoa.push(['No','Nama Siswa', ...usedFields.map(f => FIELD_LABELS[f])]);
+      SEMESTERS.forEach(sem => {
+        const rec = getAkadRec(cls, sem);
+        if (!rec || !Object.keys(rec.scores).length) return;
+        aoa.push([`KELAS ${cls} — SEMESTER ${sem} (DETAIL)`]);
+        aoa.push(['No','Nama Siswa','Tugas 1','Tugas 2','Tugas 3','Tugas 4','Tugas 5','Tugas 6','Rata Tugas','AH 1','AH 2','AH 3','SIKAP (otomatis)','Rata AH','PTS','PSAS','NA Semester','Predikat']);
         students.forEach((s, i) => {
-          const sc = p.scores[s.id] || {};
-          aoa.push([i+1, s.student_name, ...usedFields.map(f => numOf(sc[f]) ?? '')]);
+          const sc = (rec.scores[s.id] || {});
+          const sikapVal = hitungSikapFinal(s.id, cls);
+          const c = hitungAkademik(sc, sikapVal);
+          aoa.push([i+1, s.student_name,
+            sc.tugas1 ?? '', sc.tugas2 ?? '', sc.tugas3 ?? '', sc.tugas4 ?? '', sc.tugas5 ?? '', sc.tugas6 ?? '', c.rataTugas ?? '',
+            sc.ah1 ?? '', sc.ah2 ?? '', sc.ah3 ?? '', sikapVal ?? '', c.rataAH ?? '', sc.pts ?? '', sc.psas ?? '',
+            c.nilai ?? '', c.nilai === null ? '' : c.predikat]);
         });
         aoa.push([]);
       });
@@ -1636,27 +1714,31 @@
     const aoa = [
       ['REKAP NILAI LENGKAP (AKUMULASI)'], [CONFIG.school_name],
       [`Mata Pelajaran: ${CONFIG.subject_name} — Guru: ${CONFIG.teacher_name}`],
+      ['Nilai SIKAP otomatis menjadi komponen Asesmen Harian di Akademik.'],
       ['KKM Akademik: Kelas X = 75, XI = 79, XII = 80'], [],
-      ['No','Nama Siswa','Kelas','Nilai SIKAP','Predikat SIKAP','Nilai Akademik','Predikat Akademik','KKM','Tuntas?','Nilai Kelompok','Predikat Kelompok','Nama Kelompok']
+      ['No','Nama Siswa','Kelas','Nilai SIKAP','Predikat SIKAP','NA Smt 1','NA Smt 2','Nilai Akademik (Gabungan)','Predikat Akademik','KKM','Tuntas?','Nilai Kelompok','Predikat Kelompok','Nama Kelompok']
     ];
     getSortedStudents(filterClass).forEach((s, i) => {
       const kkm = getKKM(s.student_class);
       const sikap = hitungSikapFinal(s.id, s.student_class);
+      const s1 = hitungAkademikSemester(s.id, s.student_class, 1).nilai;
+      const s2 = hitungAkademikSemester(s.id, s.student_class, 2).nilai;
       const akad = hitungAkademikFinal(s.id, s.student_class);
       const kel = getStudentKelompokScore(s);
       const grp = getStudentGroup(s);
       aoa.push([i+1, s.student_name, s.student_class,
         sikap ?? '', sikap === null ? '-' : predikatSikap(sikap),
-        akad.nilai ?? '', akad.nilai === null ? '-' : akad.predikat, kkm,
-        akad.nilai === null ? '-' : (akad.nilai >= kkm ? 'Tuntas' : 'Belum Tuntas'),
+        s1 ?? '', s2 ?? '',
+        akad ?? '', akad === null ? '-' : predikatAkademik(akad), kkm,
+        akad === null ? '-' : (akad >= kkm ? 'Tuntas' : 'Belum Tuntas'),
         kel ?? '', kel === null ? '-' : predikatAkademik(kel),
         grp ? grp.name : '-']);
     });
     return aoa;
   }
   const SIKAP_COLS = [{wch:4},{wch:28},{wch:12},{wch:11},{wch:11},{wch:11},{wch:13},{wch:12},{wch:11},{wch:16},{wch:20}];
-  const AKAD_COLS = [{wch:4},{wch:28},{wch:12},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:10},{wch:8},{wch:8},{wch:8},{wch:10},{wch:8},{wch:8},{wch:12},{wch:20},{wch:8},{wch:13}];
-  const REKAP_COLS = [{wch:4},{wch:28},{wch:12},{wch:12},{wch:20},{wch:14},{wch:20},{wch:8},{wch:13},{wch:14},{wch:18},{wch:20}];
+  const AKAD_COLS = [{wch:4},{wch:28},{wch:12},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:10},{wch:8},{wch:8},{wch:8},{wch:14},{wch:10},{wch:8},{wch:8},{wch:12},{wch:20}];
+  const REKAP_COLS = [{wch:4},{wch:28},{wch:12},{wch:12},{wch:20},{wch:10},{wch:10},{wch:14},{wch:20},{wch:8},{wch:13},{wch:14},{wch:18},{wch:20}];
 
   function exportSikapExcel() {
     if (!allData.students.length) { showToast('Belum ada data siswa'); return; }
@@ -1720,7 +1802,7 @@
     const filter = document.getElementById('filter-rekap-nilai-class').value;
     doc.text(filter ? `Kelas: ${filter}` : 'Seluruh Kelas', 105, startY + 12, { align: 'center' });
     doc.setFontSize(8);
-    doc.text('KKM Akademik: X = 75, XI = 79, XII = 80', 105, startY + 16.5, { align: 'center' });
+    doc.text('KKM Akademik: X = 75, XI = 79, XII = 80 (Nilai SIKAP masuk komponen Asesmen Harian)', 105, startY + 16.5, { align: 'center' });
 
     const body = getSortedStudents(filter).map((s, i) => {
       const sikap = hitungSikapFinal(s.id, s.student_class);
@@ -1728,7 +1810,7 @@
       const kel = getStudentKelompokScore(s);
       return [i+1, s.student_name, s.student_class,
         sikap === null ? '-' : fmtNilai(sikap), sikap === null ? '-' : predikatSikap(sikap).split(' - ')[0],
-        akad.nilai === null ? '-' : fmtNilai(akad.nilai), akad.nilai === null ? '-' : akad.predikat.split(' - ')[0],
+        akad === null ? '-' : fmtNilai(akad), akad === null ? '-' : predikatAkademik(akad).split(' - ')[0],
         kel === null ? '-' : fmtNilai(kel)];
     });
 
@@ -1784,24 +1866,19 @@
     document.getElementById('filter-student-class').addEventListener('change', renderStudents);
     document.getElementById('btn-confirm-delete-action').addEventListener('click', executeDelete);
 
-    // SIKAP
-    document.getElementById('select-sikap-class').addEventListener('change', () => { document.getElementById('select-sikap-pertemuan').value = ''; renderSikap(); });
-    document.getElementById('select-sikap-pertemuan').addEventListener('change', renderSikap);
+    document.getElementById('select-sikap-class').addEventListener('change', () => { document.getElementById('select-sikap-pertemuan').value = ''; editRowId.sikap = null; renderSikap(); });
+    document.getElementById('select-sikap-pertemuan').addEventListener('change', () => { editRowId.sikap = null; renderSikap(); });
     document.getElementById('btn-add-sikap-pertemuan').addEventListener('click', addSikapPertemuan);
     document.getElementById('btn-delete-sikap-pertemuan').addEventListener('click', confirmDeleteSikapPertemuan);
     document.getElementById('btn-export-sikap-excel').addEventListener('click', exportSikapExcel);
     document.getElementById('btn-reset-sikap').addEventListener('click', confirmResetSikap);
 
-    // AKADEMIK
-    document.getElementById('select-akademik-class').addEventListener('change', () => { document.getElementById('select-akademik-pertemuan').value = ''; renderAkademik(); });
-    document.getElementById('select-akademik-pertemuan').addEventListener('change', renderAkademik);
-    document.getElementById('btn-add-akademik-pertemuan').addEventListener('click', addAkademikPertemuan);
-    document.getElementById('btn-delete-akademik-pertemuan').addEventListener('click', confirmDeleteAkademikPertemuan);
+    document.getElementById('select-akademik-class').addEventListener('change', () => { editRowId.akademik = null; renderAkademik(); });
+    document.getElementById('select-akademik-semester').addEventListener('change', () => { editRowId.akademik = null; renderAkademik(); });
     document.getElementById('btn-export-akademik-excel').addEventListener('click', exportAkademikExcel);
     document.getElementById('btn-reset-akademik').addEventListener('click', confirmResetAkademik);
 
-    // KELOMPOK
-    document.getElementById('select-kelompok-class').addEventListener('change', renderKelompok);
+    document.getElementById('select-kelompok-class').addEventListener('change', () => { editRowId.kelompok = null; renderKelompok(); });
     document.getElementById('btn-add-group').addEventListener('click', openAddGroup);
     document.getElementById('btn-add-kelompok-penilaian').addEventListener('click', openAddPenilaian);
     document.getElementById('form-add-group').addEventListener('submit', submitGroup);
@@ -1811,7 +1888,6 @@
     document.getElementById('btn-export-kelompok-excel').addEventListener('click', exportKelompokExcel);
     document.getElementById('btn-reset-kelompok').addEventListener('click', confirmResetKelompok);
 
-    // REKAP
     document.getElementById('filter-rekap-nilai-class').addEventListener('change', renderRekapNilai);
     document.getElementById('btn-download-excel-all').addEventListener('click', exportExcelLengkap);
     document.getElementById('btn-download-pdf-rekap').addEventListener('click', downloadRekapPDF);
