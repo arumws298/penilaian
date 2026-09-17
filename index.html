@@ -1115,7 +1115,7 @@ document.addEventListener('keydown', function(e) {
           const c = hitungSikapPertemuan(sc);
           const hasData = sc && SIKAP_ASPECTS.some(a => numOf(sc[a.key]) !== null);
           const isEdit = editRowId.sikap === s.id;
-          const dis = (hasData && !isEdit) ? 'disabled' : 
+          const dis = (hasData && !isEdit) ? 'disabled' : '';
 
   const cells = SIKAP_ASPECTS.map(a => {
   const v = sc ? sc[a.key] : null;
