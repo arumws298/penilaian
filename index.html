@@ -1115,15 +1115,30 @@ document.addEventListener('keydown', function(e) {
           const c = hitungSikapPertemuan(sc);
           const hasData = sc && SIKAP_ASPECTS.some(a => numOf(sc[a.key]) !== null);
           const isEdit = editRowId.sikap === s.id;
-          const dis = (hasData && !isEdit) ? 'disabled' : '';
-          const cells = SIKAP_ASPECTS.map(a => {
-            const v = sc ? sc[a.key] : null;
-            const opts = [''].concat([1,2,3,4,5]).map(o => {
-              const isSel = o === '' ? (v === null || v === undefined || v === '') : String(v) === String(o);
-              return `<option value="${o}" ${isSel ? 'selected' : ''}>${o === '' ? '-' : o}</option>`;
-            }).join('');
-            return `<td class="px-2 py-2 text-center"><select ${dis} onchange="onSikapChange('${s.id}')" data-student="${s.id}" data-key="${a.key}" class="sikap-select">${opts}</select></td>`;
-          }).join('');
+          const dis = (hasData && !isEdit) ? 'disabled' : 
+
+  const cells = SIKAP_ASPECTS.map(a => {
+  const v = sc ? sc[a.key] : null;
+
+  return `
+    <td class="px-2 py-2 text-center">
+      <input
+        type="number"
+        min="1"
+        max="5"
+        step="1"
+        inputmode="numeric"
+        ${dis}
+        value="${v ?? ''}"
+        placeholder="-"
+        onchange="onSikapChange('${s.id}')"
+        oninput="if(this.value !== '') this.value = Math.max(1, Math.min(5, Number(this.value)))"
+        data-student="${s.id}"
+        data-key="${a.key}"
+        class="sikap-select w-16 px-2 py-2 text-center border border-gray-300 rounded-lg font-semibold bg-white"
+      >
+    </td>`;
+}).join('');
           const aksi = isEdit
             ? `<button onclick="saveSikapRow('${s.id}')" class="btn-row-save" title="Simpan baris ini">💾</button>`
             : (hasData ? `<button onclick="editSikapRow('${s.id}')" class="btn-row-edit" title="Ubah nilai baris ini">✏️</button>` : '');
@@ -1150,7 +1165,7 @@ document.addEventListener('keydown', function(e) {
     const p = allData.pertemuan.sikap.find(x => x.id === pid);
     if (p) {
       if (!p.scores[studentId]) p.scores[studentId] = {};
-      document.querySelectorAll(`select.sikap-select[data-student="${studentId}"]`).forEach(sel => {
+      document.querySelectorAll(`.sikap-select[data-student="${studentId}"]`).forEach(sel => {
         p.scores[studentId][sel.dataset.key] = sel.value === '' ? null : Number(sel.value);
       });
     }
@@ -1164,7 +1179,7 @@ document.addEventListener('keydown', function(e) {
     const p = allData.pertemuan.sikap.find(x => x.id === pid);
     if (!p) return;
     if (!p.scores[studentId]) p.scores[studentId] = {};
-    document.querySelectorAll(`select.sikap-select[data-student="${studentId}"]`).forEach(sel => {
+    document.querySelectorAll(`.sikap-select[data-student="${studentId}"]`).forEach(sel => {
       p.scores[studentId][sel.dataset.key] = sel.value === '' ? null : Number(sel.value);
     });
     const c = hitungSikapPertemuan(p.scores[studentId]);
