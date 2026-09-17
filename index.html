@@ -711,6 +711,73 @@
       });
     }
   }
+// ================= NAVIGASI INPUT NILAI DENGAN ENTER / SPASI =================
+document.addEventListener('keydown', function(e) {
+  // Hanya bekerja pada input nilai
+  const current = e.target.closest(
+    'input.akad-input, input.kelompok-input, select.sikap-select'
+  );
+
+  if (!current) return;
+
+  // Enter atau Spasi
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+
+  // Jangan biarkan Enter/Spasi melakukan fungsi bawaan browser
+  e.preventDefault();
+
+  // Untuk select SIKAP, gunakan data-key
+  const key = current.dataset.key;
+
+  // Cari semua input/select pada kolom yang sama
+  let fields = [];
+
+  if (current.classList.contains('akad-input')) {
+    fields = [...document.querySelectorAll(
+      `input.akad-input[data-key="${key}"]`
+    )];
+  }
+
+  else if (current.classList.contains('kelompok-input')) {
+    const penilaian = current.dataset.penilaian;
+
+    fields = [...document.querySelectorAll(
+      `input.kelompok-input[data-penilaian="${penilaian}"]`
+    )];
+  }
+
+  else if (current.classList.contains('sikap-select')) {
+    fields = [...document.querySelectorAll(
+      `select.sikap-select[data-key="${key}"]`
+    )];
+  }
+
+  // Cari posisi input yang sedang aktif
+  const index = fields.indexOf(current);
+
+  // Kalau masih ada baris berikutnya
+  if (index >= 0 && index < fields.length - 1) {
+    const next = fields[index + 1];
+
+    // Simpan perubahan nilai sebelum pindah
+    current.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // Fokus ke input berikutnya
+    setTimeout(() => {
+      next.focus();
+
+      // Untuk input angka, blok angka yang sudah ada agar mudah diganti
+      if (next.tagName === 'INPUT') {
+        next.select();
+      }
+    }, 50);
+  } 
+  else {
+    // Jika sudah di baris terakhir, simpan saja
+    current.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+});
+  
   document.addEventListener('DOMContentLoaded', initApp);
   if (document.readyState !== 'loading') initApp();
 
