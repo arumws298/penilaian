@@ -1,0 +1,2290 @@
+<!doctype html>
+<html lang="id" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Penilaian KACIW - SIKAP, Akademik & Kelompok</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    .glass-effect { background: rgba(30, 64, 175, 0.75); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+    .card-glass { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border: 1px solid rgba(30,64,175,0.1); }
+    .btn-primary { background: linear-gradient(135deg, rgba(30,64,175,0.9) 0%, rgba(59,130,246,0.9) 100%); transition: all .3s ease; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(30,64,175,0.4); }
+    .fade-in { animation: fadeIn .4s ease-out; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(-20px);} to { opacity:1; transform: translateY(0);} }
+    .menu-card { transition: all .3s ease; cursor: pointer; }
+    .menu-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 12px 30px rgba(30,64,175,0.3); }
+    .menu-card:hover .icon-bounce { animation: bounce .6s ease; }
+    @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+    .modal-backdrop { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
+    input:focus, select:focus, textarea:focus { outline:none; border-color: rgba(30,64,175,0.5); box-shadow: 0 0 0 3px rgba(30,64,175,0.1); }
+    .sikap-select { width: 58px; text-align:center; font-weight:700; padding:4px; border:2px solid #e5e7eb; border-radius:8px; background:#fff; }
+    .akad-input { width: 56px; text-align:center; font-weight:600; padding:4px; border:2px solid #e5e7eb; border-radius:8px; }
+    .kelompok-input { width: 62px; text-align:center; font-weight:600; padding:4px; border:2px solid #e5e7eb; border-radius:8px; background:#fff; }
+    input:disabled, select:disabled { background:#f1f5f9 !important; color:#475569 !important; opacity:.85; }
+    body.dark input:disabled, body.dark select:disabled { background:#1e293b !important; color:#94a3b8 !important; }
+    tr.row-editing { background:#fef9c3 !important; }
+    body.dark tr.row-editing { background:#422006 !important; }
+    .btn-row-edit { background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:5px 9px; font-size:14px; line-height:1; transition: all .2s; }
+    .btn-row-edit:hover { border-color:#3b82f6; background:#eff6ff; }
+    .btn-row-save { background:#2563eb; border:1px solid #2563eb; color:#fff; border-radius:8px; padding:5px 9px; font-size:14px; line-height:1; transition: all .2s; }
+    .btn-row-save:hover { background:#1d4ed8; }
+    .sikap-auto { width: 62px; text-align:center; font-weight:700; padding:4px; border:2px dashed #c7d2fe; border-radius:8px; background:#eef2ff; color:#4338ca; }
+    body.dark .sikap-auto { background:#1e1b4b; color:#c7d2fe; border-color:#4338ca; }
+    body.dark { background:#0f172a !important; color:#f8fafc; transition:.3s; }
+    body.dark .glass-effect { background:#0f172a; }
+    body.dark .card-glass { background:#1e293b; color:#f8fafc; border-color:#334155; }
+    body.dark h1, body.dark h2, body.dark h3, body.dark h4, body.dark label, body.dark p,
+    body.dark span, body.dark td, body.dark th { color:#f8fafc !important; }
+    body.dark input, body.dark select, body.dark textarea { background:#0f172a; color:#fff; border-color:#475569; }
+    body.dark .sikap-select, body.dark .akad-input, body.dark .kelompok-input { background:#0f172a; color:#fff; border-color:#475569; }
+    body.dark tbody tr:hover { background:#334155; }
+    body.dark .bg-white { background:#1e293b !important; }
+    body.dark .bg-blue-50, body.dark .bg-blue-100, body.dark .bg-green-50, body.dark .bg-green-100,
+    body.dark .bg-yellow-50, body.dark .bg-yellow-100, body.dark .bg-red-50, body.dark .bg-red-100,
+    body.dark .bg-purple-50, body.dark .bg-purple-100, body.dark .bg-purple-700,
+    body.dark .bg-emerald-50, body.dark .bg-emerald-700, body.dark .bg-indigo-50, body.dark .bg-indigo-100,
+    body.dark .bg-amber-50, body.dark .bg-amber-100, body.dark .bg-orange-100, body.dark .bg-gray-50 { background:#334155 !important; }
+    body.dark .text-gray-600, body.dark .text-gray-700, body.dark .text-gray-500 { color:#cbd5e1 !important; }
+    body.dark .text-blue-700, body.dark .text-blue-800, body.dark .text-green-700, body.dark .text-purple-700,
+    body.dark .text-indigo-700, body.dark .text-amber-600, body.dark .text-yellow-700,
+    body.dark .text-red-700, body.dark .text-orange-700, body.dark .text-emerald-700 { color:#e2e8f0 !important; }
+    body.dark .btn-row-edit { background:#1e293b; border-color:#475569; }
+    body.dark .btn-row-save { background:#2563eb; border-color:#2563eb; }
+
+    /* ================= DARK MODE - KONTRAS LENGKAP =================
+       Hanya aktif saat body memiliki class "dark".
+       Tidak mengubah tampilan Light Mode maupun logika aplikasi. */
+    body.dark .text-gray-900,
+    body.dark .text-gray-800,
+    body.dark .text-gray-700,
+    body.dark .text-gray-600,
+    body.dark .text-gray-500,
+    body.dark .text-gray-400,
+    body.dark .text-blue-900,
+    body.dark .text-blue-800,
+    body.dark .text-blue-700,
+    body.dark .text-indigo-900,
+    body.dark .text-indigo-800,
+    body.dark .text-indigo-700,
+    body.dark .text-purple-900,
+    body.dark .text-purple-800,
+    body.dark .text-purple-700,
+    body.dark .text-green-900,
+    body.dark .text-green-800,
+    body.dark .text-green-700,
+    body.dark .text-emerald-900,
+    body.dark .text-emerald-800,
+    body.dark .text-emerald-700,
+    body.dark .text-amber-900,
+    body.dark .text-amber-800,
+    body.dark .text-amber-700,
+    body.dark .text-yellow-900,
+    body.dark .text-yellow-800,
+    body.dark .text-yellow-700,
+    body.dark .text-orange-900,
+    body.dark .text-orange-800,
+    body.dark .text-orange-700,
+    body.dark .text-red-900,
+    body.dark .text-red-800,
+    body.dark .text-red-700 {
+      color: #f8fafc !important;
+    }
+
+    /* Teks yang berada langsung di dalam kotak informasi */
+    body.dark .bg-blue-50,
+    body.dark .bg-blue-100,
+    body.dark .bg-green-50,
+    body.dark .bg-green-100,
+    body.dark .bg-purple-50,
+    body.dark .bg-purple-100,
+    body.dark .bg-indigo-50,
+    body.dark .bg-indigo-100,
+    body.dark .bg-amber-50,
+    body.dark .bg-amber-100,
+    body.dark .bg-yellow-50,
+    body.dark .bg-yellow-100,
+    body.dark .bg-red-50,
+    body.dark .bg-red-100,
+    body.dark .bg-orange-100,
+    body.dark .bg-emerald-50,
+    body.dark .bg-gray-50 {
+      color: #f8fafc !important;
+    }
+
+    /* Penilaian SIKAP: tabel, nama siswa, total, dan nilai harus jelas */
+    body.dark #sikap-table-body td,
+    body.dark #sikap-akum-body td,
+    body.dark #sikap-table-body td *,
+    body.dark #sikap-akum-body td * {
+      color: #f8fafc !important;
+    }
+
+    body.dark #sikap-table-body tr,
+    body.dark #sikap-akum-body tr {
+      border-color: #475569 !important;
+    }
+
+    /* Input SIKAP aktif maupun terkunci */
+    body.dark #sikap-table-body .sikap-select {
+      background: #0f172a !important;
+      color: #ffffff !important;
+      border-color: #64748b !important;
+      caret-color: #ffffff;
+    }
+
+    body.dark #sikap-table-body .sikap-select::placeholder,
+    body.dark #sikap-table-body input::placeholder {
+      color: #94a3b8 !important;
+      opacity: 1;
+    }
+
+    body.dark #sikap-table-body .sikap-select:disabled {
+      background: #1e293b !important;
+      color: #e2e8f0 !important;
+      border-color: #475569 !important;
+      opacity: 1 !important;
+    }
+
+    /* Dropdown/select termasuk option agar tidak putih-putih */
+    body.dark select,
+    body.dark select option {
+      background-color: #0f172a !important;
+      color: #f8fafc !important;
+    }
+
+    body.dark select:disabled,
+    body.dark select:disabled option {
+      background-color: #1e293b !important;
+      color: #cbd5e1 !important;
+    }
+
+    /* Kotak input akademik & kelompok */
+    body.dark .akad-input,
+    body.dark .kelompok-input {
+      background: #0f172a !important;
+      color: #ffffff !important;
+      border-color: #64748b !important;
+    }
+
+    body.dark .akad-input::placeholder,
+    body.dark .kelompok-input::placeholder {
+      color: #94a3b8 !important;
+      opacity: 1;
+    }
+
+    /* Baris editing tetap terbaca */
+    body.dark tr.row-editing,
+    body.dark tr.row-editing td {
+      background: #422006 !important;
+      color: #fff7ed !important;
+    }
+
+    /* Empty state / keterangan kecil */
+    body.dark #sikap-empty-state,
+    body.dark #sikap-akum-empty,
+    body.dark #sikap-empty-text,
+    body.dark #sikap-akum-class {
+      color: #cbd5e1 !important;
+    }
+
+    /* Border tabel dan container supaya tidak menyatu dengan background */
+    body.dark .border-gray-100,
+    body.dark .border-gray-200,
+    body.dark .border-gray-300 {
+      border-color: #475569 !important;
+    }
+
+    /* Checkbox/radio dan label dinamis pada modal */
+    body.dark input[type="checkbox"] + label,
+    body.dark input[type="radio"] + label {
+      color: #f8fafc !important;
+    }
+  
+  /* ================= TOMBOL KEMBALI =================
+     Kontras khusus untuk tema merah agar tulisan selalu terbaca. */
+  button.btn-back,
+  button[onclick*="showPage('main')"] {
+    color: #991b1b !important;
+    background: rgba(255,255,255,0.92) !important;
+    border: 1px solid rgba(127,29,29,0.18);
+    text-shadow: none !important;
+  }
+  button.btn-back:hover,
+  button[onclick*="showPage('main')"]:hover {
+    color: #7f1d1d !important;
+    background: #ffffff !important;
+  }
+  body.dark button.btn-back,
+  body.dark button[onclick*="showPage('main')"] {
+    color: #991b1b !important;
+    background: #f8fafc !important;
+    border-color: #fecaca !important;
+  }
+  body.dark button.btn-back:hover,
+  body.dark button[onclick*="showPage('main')"]:hover {
+    color: #7f1d1d !important;
+    background: #ffffff !important;
+  }
+</style>
+</head>
+<body class="h-full" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);">
+<div id="app" class="h-full overflow-auto">
+
+  <!-- ================= LOGIN ================= -->
+  <div id="login-page" class="min-h-screen flex items-center justify-center p-4">
+    <div class="card-glass rounded-3xl shadow-2xl w-full max-w-md p-8 fade-in">
+      <div class="text-center mb-8">
+        <div class="w-24 h-24 mx-auto mb-4 rounded-full flex items-center justify-center shadow-lg overflow-hidden bg-white border-4 border-blue-100">
+          <img src="https://iili.io/fv13nAG.png" alt="Logo KACIW" class="w-full h-full object-cover p-2">
+        </div>
+        <h1 class="text-3xl font-bold text-blue-900 mb-1">Penilaian KACIW</h1>
+        <p class="text-sm text-gray-500 mb-3">SIKAP • Akademik • Kelompok</p>
+        <p class="text-gray-600" id="login-school-name">SMKN 9 Kabupaten Tangerang</p>
+      </div>
+      <form id="login-form" class="space-y-6">
+        <div>
+          <label for="login-username" class="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+          <input type="text" id="login-username" required autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl" placeholder="Masukkan Username">
+        </div>
+        <div>
+          <label for="login-password" class="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+          <input type="password" id="login-password" required autocomplete="off" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl" placeholder="Masukkan Password">
+        </div>
+        <div id="login-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+          <strong>Login Gagal!</strong> Username atau password salah.
+        </div>
+        <button type="submit" class="w-full btn-primary text-white font-bold py-3 px-6 rounded-xl shadow-lg">Masuk</button>
+      </form>
+      <div class="mt-6 text-center">
+        <p class="text-gray-500 mt-1" style="font-size:11px;">Development : @Arum Ws • 2026</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DASHBOARD ================= -->
+  <div id="dashboard-page" class="hidden min-h-screen">
+    <header class="glass-effect text-white py-4 px-4 sticky top-0 z-40 shadow-lg">
+      <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden bg-white shadow-md">
+            <img src="https://iili.io/fv13nAG.png" alt="Logo KACIW" class="w-full h-full object-cover">
+          </div>
+          <div>
+            <h1 class="text-lg md:text-xl font-bold">Penilaian Matematika KACIW</h1>
+            <p class="text-xs text-blue-100" id="header-school-name">SMKN 9 Kabupaten Tangerang</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button id="btn-theme" class="bg-white/20 hover:bg-white/30 w-10 h-10 rounded-xl transition-all text-lg" title="Dark Mode">🌙</button>
+          <button id="btn-logout" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-sm font-semibold transition-all">Keluar</button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-dashboard" class="max-w-7xl mx-auto px-4 py-8">
+      <div class="text-center mb-8 text-white fade-in">
+        <h2 class="text-3xl md:text-4xl font-bold mb-2">Selamat Datang</h2>
+        <p class="text-lg text-blue-100 font-bold" id="dashboard-teacher-name">Arum Widya Safitri, S.Pd</p>
+        <p class="text-blue-100">Guru Mata Pelajaran <span id="dashboard-subject">Matematika</span></p>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div class="card-glass rounded-2xl p-5 text-center shadow-lg">
+          <div class="text-4xl mb-2">🎓</div>
+          <div id="dashboard-total-students" class="text-3xl font-extrabold text-blue-700">0</div>
+          <p class="text-gray-600 font-semibold">Total Siswa</p>
+        </div>
+        <div class="card-glass rounded-2xl p-5 text-center shadow-lg">
+          <div class="text-4xl mb-2">🏫</div>
+          <div id="dashboard-total-classes" class="text-3xl font-extrabold text-indigo-700">0</div>
+          <p class="text-gray-600 font-semibold">Total Kelas</p>
+        </div>
+        <div class="card-glass rounded-2xl p-5 text-center shadow-lg">
+          <div class="text-4xl mb-2">👥</div>
+          <div id="dashboard-total-groups" class="text-3xl font-extrabold text-purple-700">0</div>
+          <p class="text-gray-600 font-semibold">Total Kelompok</p>
+        </div>
+        <div class="card-glass rounded-2xl p-5 text-center shadow-lg">
+          <div class="text-4xl mb-2">📅</div>
+          <div id="dashboard-total-pertemuan" class="text-3xl font-extrabold text-amber-600">0</div>
+          <p class="text-gray-600 font-semibold">Pertemuan SIKAP</p>
+        </div>
+      </div>
+
+      <div class="card-glass rounded-2xl p-6 shadow-lg mb-8">
+        <h3 class="text-xl font-bold text-blue-900 mb-4">Ringkasan Penilaian (Akumulasi)</h3>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-purple-50 rounded-xl p-4 text-center"><div id="dashboard-sikap-done" class="text-2xl font-bold text-purple-700">0</div><p class="text-sm text-gray-600">Siswa Dinilai SIKAP</p></div>
+          <div class="bg-indigo-50 rounded-xl p-4 text-center"><div id="dashboard-akademik-done" class="text-2xl font-bold text-indigo-700">0</div><p class="text-sm text-gray-600">Siswa Dinilai Akademik</p></div>
+          <div class="bg-amber-50 rounded-xl p-4 text-center"><div id="dashboard-rata-sikap" class="text-2xl font-bold text-amber-600">-</div><p class="text-sm text-gray-600">Rata-rata Nilai SIKAP</p></div>
+          <div class="bg-green-50 rounded-xl p-4 text-center"><div id="dashboard-rata-akademik" class="text-2xl font-bold text-green-700">-</div><p class="text-sm text-gray-600">Rata-rata Akademik (Gabungan)</p></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
+        <div class="menu-card card-glass rounded-2xl p-6 shadow-xl" onclick="showPage('manajemen-siswa')">
+          <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center shadow-lg icon-bounce"><span class="text-4xl">🎓</span></div>
+          <h3 class="text-xl font-bold text-blue-900 mb-2 text-center">Manajemen Siswa</h3>
+          <p class="text-gray-600 text-sm text-center">Kelola data & import Excel</p>
+        </div>
+        <div class="menu-card card-glass rounded-2xl p-6 shadow-xl" onclick="showPage('penilaian-sikap')">
+          <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-fuchsia-400 to-purple-600 flex items-center justify-center shadow-lg icon-bounce"><span class="text-4xl">⭐</span></div>
+          <h3 class="text-xl font-bold text-blue-900 mb-2 text-center">Penilaian SIKAP</h3>
+          <p class="text-gray-600 text-sm text-center">Per pertemuan → masuk Asesmen Harian</p>
+        </div>
+        <div class="menu-card card-glass rounded-2xl p-6 shadow-xl" onclick="showPage('penilaian-akademik')">
+          <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center shadow-lg icon-bounce"><span class="text-4xl">📝</span></div>
+          <h3 class="text-xl font-bold text-blue-900 mb-2 text-center">Penilaian Akademik</h3>
+          <p class="text-gray-600 text-sm text-center">Per semester → gabungan bobot</p>
+        </div>
+        <div class="menu-card card-glass rounded-2xl p-6 shadow-xl" onclick="showPage('penilaian-kelompok')">
+          <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-amber-400 to-red-500 flex items-center justify-center shadow-lg icon-bounce"><span class="text-4xl">👥</span></div>
+          <h3 class="text-xl font-bold text-blue-900 mb-2 text-center">Penilaian Kelompok</h3>
+          <p class="text-gray-600 text-sm text-center">Asesmen tugas kelompok</p>
+        </div>
+        <div class="menu-card card-glass rounded-2xl p-6 shadow-xl" onclick="showPage('rekap-nilai')">
+          <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-rose-400 to-pink-600 flex items-center justify-center shadow-lg icon-bounce"><span class="text-4xl">📊</span></div>
+          <h3 class="text-xl font-bold text-blue-900 mb-2 text-center">Rekap & Download</h3>
+          <p class="text-gray-600 text-sm text-center">Seluruh nilai → Excel / PDF</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- ============ MANAJEMEN SISWA ============ -->
+    <div id="manajemen-siswa-page" class="hidden max-w-7xl mx-auto px-4 py-6">
+      <button type="button" onclick="window.showPage('main'); return false;" class="btn-back mb-4 bg-white/90 hover:bg-white px-4 py-2 rounded-xl font-semibold transition-all shadow-sm">← Kembali</button>
+      <div class="card-glass rounded-2xl p-6 shadow-xl">
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+          <h2 class="text-2xl font-bold text-blue-900">Manajemen Siswa</h2>
+          <div class="text-sm text-gray-500">Total Siswa: <span id="total-students-count" class="font-bold text-blue-600">0</span></div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+          <button id="btn-add-student-manual" class="btn-primary text-white font-semibold py-3 px-4 rounded-xl shadow-md">+ Tambah Manual</button>
+          <button id="btn-download-template" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md">↓ Template Excel</button>
+          <label class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3 px-4 rounded-xl transition-all text-center cursor-pointer shadow-md">📁 Import Excel<input type="file" id="input-import-excel" accept=".xlsx,.xls" class="hidden"></label>
+          <button id="btn-delete-class-students" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md">🗑 Hapus Kelas Ini</button>
+          <button id="btn-delete-all-students" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-xl transition-all shadow-md">❌ Hapus Semua</button>
+        </div>
+        <div class="mb-6 bg-blue-50 p-4 rounded-xl">
+          <label for="filter-student-class" class="block text-sm font-semibold text-gray-700 mb-2">Filter Berdasarkan Kelas</label>
+          <select id="filter-student-class" class="w-full md:w-64 px-4 py-3 border-2 border-gray-200 rounded-xl font-semibold bg-white"><option value="">Semua Kelas</option></select>
+        </div>
+        <div class="overflow-x-auto rounded-xl border border-gray-200">
+          <table class="w-full">
+            <thead class="bg-blue-600 text-white">
+              <tr>
+                <th class="px-4 py-3 text-left text-sm font-bold">No</th>
+                <th class="px-4 py-3 text-left text-sm font-bold">Nama Siswa</th>
+                <th class="px-4 py-3 text-left text-sm font-bold">Kelas</th>
+                <th class="px-4 py-3 text-center text-sm font-bold">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="student-table-body"></tbody>
+          </table>
+        </div>
+        <div id="student-empty-state" class="hidden py-12 text-center">
+          <div class="text-6xl mb-4">🎓</div>
+          <p class="text-gray-600 font-semibold">Belum ada data siswa</p>
+        </div>
+        <p class="text-xs text-gray-500 mt-3">☁️ Data tersimpan otomatis di Supabase setiap ada perubahan.</p>
+      </div>
+    </div>
+
+    <!-- ============ PENILAIAN SIKAP ============ -->
+    <div id="penilaian-sikap-page" class="hidden max-w-7xl mx-auto px-4 py-6">
+      <button type="button" onclick="window.showPage('main'); return false;" class="btn-back mb-4 bg-white/90 hover:bg-white px-4 py-2 rounded-xl font-semibold transition-all shadow-sm">← Kembali</button>
+      <div class="card-glass rounded-2xl p-6 shadow-xl mb-6">
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+          <div>
+            <h2 class="text-2xl font-bold text-blue-900">Penilaian SIKAP</h2>
+            <p class="text-sm text-gray-500">Kebersihan • Kerapihan • Keaktifan • Sopan Santun • Kolaborasi</p>
+          </div>
+          <div class="flex gap-2 flex-wrap">
+            <button id="btn-add-sikap-pertemuan" class="btn-primary text-white font-semibold py-2 px-4 rounded-xl shadow-md">+ Pertemuan</button>
+            <button id="btn-export-sikap-excel" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-xl shadow-md">📥 Excel</button>
+            <button id="btn-delete-sikap-pertemuan" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl shadow-md">🗑 Hapus Pertemuan Ini</button>
+            <button id="btn-reset-sikap" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-xl shadow-md">⟳ Reset Kelas</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Kelas</label>
+            <select id="select-sikap-class" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-semibold bg-white"><option value="">Pilih Kelas</option></select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Pertemuan Ke-</label>
+            <select id="select-sikap-pertemuan" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-semibold bg-white"><option value="">-</option></select>
+          </div>
+        </div>
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4 text-sm text-blue-900">
+          ℹ️ Baris <b>belum dinilai</b> → kolom aktif, isi langsung (otomatis tersimpan).<br>
+          ✏️ Baris <b>sudah dinilai</b> → terkunci, klik <b>✏️</b> untuk ubah → klik <b>💾</b> untuk simpan & kunci.<br>
+          📊 Akumulasi = rata-rata nilai seluruh pertemuan (skala 100) — <b>otomatis masuk ke Asesmen Harian di Penilaian Akademik</b>.
+        </div>
+
+        <h3 class="font-bold text-blue-900 mb-3">Skor Pertemuan Ini</h3>
+        <div class="overflow-x-auto rounded-xl border border-gray-200 mb-2">
+          <table class="w-full text-sm">
+            <thead class="bg-blue-600 text-white">
+              <tr>
+                <th class="px-3 py-3 text-left text-xs font-bold">No</th>
+                <th class="px-3 py-3 text-left text-xs font-bold">Nama Siswa</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Kebersihan</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Kerapihan</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Keaktifan</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Sopan Santun</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Kolaborasi</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Total</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Nilai P. Ini</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="sikap-table-body"></tbody>
+          </table>
+        </div>
+        <div id="sikap-empty-state" class="hidden py-12 text-center">
+          <div class="text-6xl mb-4">⭐</div>
+          <p id="sikap-empty-text" class="text-gray-600 font-semibold">Pilih kelas & pertemuan untuk mulai menilai</p>
+        </div>
+      </div>
+
+      <div class="card-glass rounded-2xl p-6 shadow-xl">
+        <h3 class="text-xl font-bold text-blue-900 mb-4">📊 Akumulasi Nilai SIKAP <span id="sikap-akum-class" class="text-sm text-gray-500 font-normal"></span></h3>
+        <div class="overflow-x-auto rounded-xl border border-gray-200">
+          <table class="w-full text-sm">
+            <thead class="bg-purple-600 text-white" id="sikap-akum-thead"></thead>
+            <tbody id="sikap-akum-body"></tbody>
+          </table>
+        </div>
+        <div id="sikap-akum-empty" class="hidden py-8 text-center text-gray-500 font-semibold text-sm">Belum ada pertemuan yang dinilai</div>
+      </div>
+    </div>
+
+    <!-- ============ PENILAIAN AKADEMIK (PER SEMESTER + SIKAP di AH) ============ -->
+    <div id="penilaian-akademik-page" class="hidden max-w-7xl mx-auto px-4 py-6">
+      <button type="button" onclick="window.showPage('main'); return false;" class="btn-back mb-4 bg-white/90 hover:bg-white px-4 py-2 rounded-xl font-semibold transition-all shadow-sm">← Kembali</button>
+      <div class="card-glass rounded-2xl p-6 shadow-xl mb-6">
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+          <div>
+            <h2 class="text-2xl font-bold text-blue-900">Penilaian Akademik</h2>
+            <p class="text-sm text-gray-500">Tugas 1-6 • Asesmen Harian 1-3 + SIKAP • PTS • PSAS — per Semester</p>
+          </div>
+          <div class="flex gap-2 flex-wrap">
+            <button id="btn-export-akademik-excel" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-xl shadow-md">📥 Excel</button>
+            <button id="btn-reset-akademik" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-xl shadow-md">⟳ Reset Kelas</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Kelas</label>
+            <select id="select-akademik-class" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-semibold bg-white"><option value="">Pilih Kelas</option></select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Semester</label>
+            <select id="select-akademik-semester" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-semibold bg-white">
+              <option value="1">Semester 1</option>
+              <option value="2">Semester 2</option>
+            </select>
+          </div>
+        </div>
+        <div id="akademik-info" class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4 text-sm text-blue-900">ℹ️ Input nilai <b>per semester</b>.</div>
+
+        <h3 class="font-bold text-blue-900 mb-3">Nilai Semester Ini</h3>
+        <div class="overflow-x-auto rounded-xl border border-gray-200 mb-2">
+          <table class="w-full text-sm">
+            <thead class="bg-blue-600 text-white">
+              <tr>
+                <th rowspan="2" class="px-2 py-2 text-left text-xs font-bold">No</th>
+                <th rowspan="2" class="px-3 py-2 text-left text-xs font-bold">Nama Siswa</th>
+                <th colspan="6" class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400">Tugas</th>
+                <th colspan="4" class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400">Asesmen Harian (termasuk SIKAP)</th>
+                <th rowspan="2" class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400">PTS</th>
+                <th rowspan="2" class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400">PSAS</th>
+                <th rowspan="2" class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400 bg-blue-700">NA Smt</th>
+                <th rowspan="2" class="px-2 py-2 text-center text-xs font-bold">Aksi</th>
+              </tr>
+              <tr>
+                <th class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400">1</th><th class="px-1 py-2 text-center text-xs font-bold">2</th><th class="px-1 py-2 text-center text-xs font-bold">3</th><th class="px-1 py-2 text-center text-xs font-bold">4</th><th class="px-1 py-2 text-center text-xs font-bold">5</th><th class="px-1 py-2 text-center text-xs font-bold">6</th>
+                <th class="px-2 py-2 text-center text-xs font-bold border-l border-blue-400">1</th><th class="px-1 py-2 text-center text-xs font-bold">2</th><th class="px-1 py-2 text-center text-xs font-bold">3</th><th class="px-2 py-2 text-center text-xs font-bold bg-indigo-700">SIKAP</th>
+              </tr>
+            </thead>
+            <tbody id="akademik-table-body"></tbody>
+          </table>
+        </div>
+        <div id="akademik-empty-state" class="hidden py-12 text-center">
+          <div class="text-6xl mb-4">📝</div>
+          <p id="akademik-empty-text" class="text-gray-600 font-semibold">Pilih kelas untuk mulai menilai</p>
+        </div>
+      </div>
+
+      <div class="card-glass rounded-2xl p-6 shadow-xl">
+        <h3 class="text-xl font-bold text-blue-900 mb-4">📊 Rekap Akademik per Semester <span id="akademik-akum-class" class="text-sm text-gray-500 font-normal"></span></h3>
+        <div class="overflow-x-auto rounded-xl border border-gray-200">
+          <table class="w-full text-sm">
+            <thead class="bg-emerald-600 text-white">
+              <tr>
+                <th class="px-2 py-2 text-left text-xs font-bold">No</th>
+                <th class="px-3 py-2 text-left text-xs font-bold">Nama Siswa</th>
+                <th class="px-2 py-2 text-center text-xs font-bold">NA Semester 1</th>
+                <th class="px-2 py-2 text-center text-xs font-bold">NA Semester 2</th>
+                <th class="px-2 py-2 text-center text-xs font-bold bg-emerald-700">Nilai Akhir (Gabungan)</th>
+                <th class="px-2 py-2 text-center text-xs font-bold bg-emerald-700">Predikat</th>
+              </tr>
+            </thead>
+            <tbody id="akademik-akum-body"></tbody>
+          </table>
+        </div>
+        <div id="akademik-akum-empty" class="hidden py-8 text-center text-gray-500 font-semibold text-sm">Belum ada nilai yang diinput</div>
+        <p class="text-xs text-gray-500 mt-3">Rata AH = rata-rata (AH 1-3 + Nilai SIKAP). NA per Semester = 35% Rata Tugas + 35% Rata AH + 20% PTS + 10% PSAS. Nilai Akhir Gabungan = rata-rata NA semester yang terisi. Merah = di bawah KKM (X: 75, XI: 79, XII: 80).</p>
+      </div>
+    </div>
+
+    <!-- ============ PENILAIAN KELOMPOK ============ -->
+    <div id="penilaian-kelompok-page" class="hidden max-w-7xl mx-auto px-4 py-6">
+      <button type="button" onclick="window.showPage('main'); return false;" class="btn-back mb-4 bg-white/90 hover:bg-white px-4 py-2 rounded-xl font-semibold transition-all shadow-sm">← Kembali</button>
+      <div class="card-glass rounded-2xl p-6 shadow-xl">
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+          <div>
+            <h2 class="text-2xl font-bold text-blue-900">Penilaian Kelompok</h2>
+            <p class="text-sm text-gray-500">Hasil asesmen tugas kelompok (skala 0-100)</p>
+          </div>
+          <div class="flex gap-2 flex-wrap">
+            <button id="btn-add-kelompok-penilaian" class="btn-primary text-white font-semibold py-2 px-4 rounded-xl shadow-md">+ Penilaian Baru</button>
+            <button id="btn-export-kelompok-excel" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-xl shadow-md">📥 Excel</button>
+            <button id="btn-reset-kelompok" class="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-xl shadow-md">⟳ Reset Kelas</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Kelas</label>
+            <select id="select-kelompok-class" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl font-semibold bg-white"><option value="">Pilih Kelas</option></select>
+          </div>
+        </div>
+
+        <div class="mb-8">
+          <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+            <h3 class="font-bold text-blue-900">Daftar Kelompok</h3>
+            <button id="btn-add-group" class="bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-4 rounded-xl shadow-md">+ Tambah Kelompok</button>
+          </div>
+          <div id="kelompok-groups-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+
+        <div>
+          <h3 class="font-bold text-blue-900 mb-4">Nilai Kelompok</h3>
+          <div class="overflow-x-auto rounded-xl border border-gray-200">
+            <table class="w-full text-sm">
+              <thead class="bg-blue-600 text-white" id="kelompok-score-thead"></thead>
+              <tbody id="kelompok-score-body"></tbody>
+            </table>
+          </div>
+          <div id="kelompok-empty-state" class="hidden py-12 text-center">
+            <div class="text-6xl mb-4">👥</div>
+            <p id="kelompok-empty-text" class="text-gray-600 font-semibold">Pilih kelas untuk mengelola kelompok</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ REKAP NILAI & DOWNLOAD ============ -->
+    <div id="rekap-nilai-page" class="hidden max-w-7xl mx-auto px-4 py-6">
+      <button type="button" onclick="window.showPage('main'); return false;" class="btn-back mb-4 bg-white/90 hover:bg-white px-4 py-2 rounded-xl font-semibold transition-all shadow-sm">← Kembali</button>
+      <div class="card-glass rounded-2xl p-6 shadow-xl">
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+          <h2 class="text-2xl font-bold text-blue-900">Rekap Nilai & Download</h2>
+          <div class="flex gap-2 flex-wrap">
+            <button id="btn-download-excel-all" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-xl shadow-md">📥 Download Excel Lengkap</button>
+            <button id="btn-download-pdf-rekap" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-xl shadow-md">📄 PDF</button>
+          </div>
+        </div>
+        <div class="mb-4 bg-blue-50 p-4 rounded-xl">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Filter Kelas (mempengaruhi file download)</label>
+          <select id="filter-rekap-nilai-class" class="w-full md:w-64 px-4 py-3 border-2 border-gray-200 rounded-xl font-semibold bg-white"><option value="">Semua Kelas</option></select>
+        </div>
+        <div class="overflow-x-auto rounded-xl border border-gray-200">
+          <table class="w-full text-sm">
+            <thead class="bg-blue-600 text-white">
+              <tr>
+                <th class="px-2 py-3 text-left text-xs font-bold">No</th>
+                <th class="px-3 py-3 text-left text-xs font-bold">Nama Siswa</th>
+                <th class="px-2 py-3 text-left text-xs font-bold">Kelas</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">SIKAP</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Predikat</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Akd Smt 1</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Akd Smt 2</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Akademik</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Predikat</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Kelompok</th>
+                <th class="px-2 py-3 text-center text-xs font-bold">Nama Kelompok</th>
+              </tr>
+            </thead>
+            <tbody id="rekap-nilai-body"></tbody>
+          </table>
+        </div>
+        <div id="rekap-nilai-empty" class="hidden py-12 text-center">
+          <div class="text-6xl mb-4">📊</div>
+          <p class="text-gray-600 font-semibold">Belum ada data untuk direkap</p>
+        </div>
+        <p class="text-xs text-gray-500 mt-3">Merah = di bawah KKM (Akademik & Kelompok — kelas X: 75, XI: 79, XII: 80). Nilai SIKAP otomatis menjadi komponen Asesmen Harian. Excel berisi 4 sheet.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODALS ================= -->
+  <div id="modal-add-student" class="fixed inset-0 z-50 hidden"><div class="modal-backdrop absolute inset-0" onclick="closeModal('modal-add-student')"></div><div class="absolute inset-0 flex items-center justify-center p-4"><div class="card-glass rounded-2xl w-full max-w-md fade-in p-6"><h3 class="text-xl font-bold text-blue-900 mb-4">Tambah Siswa</h3><form id="form-add-student" class="space-y-4"><div><label class="block text-sm font-semibold text-gray-700 mb-1">Nama Siswa</label><input type="text" id="input-student-name" required class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl"></div><div><label class="block text-sm font-semibold text-gray-700 mb-1">Kelas</label><select id="input-student-class" required class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl bg-white"><option value="">Pilih Kelas</option></select></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal('modal-add-student')" class="flex-1 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl">Batal</button><button type="submit" class="flex-1 btn-primary text-white font-semibold py-2 rounded-xl">Simpan</button></div></form></div></div></div>
+
+  <div id="modal-add-group" class="fixed inset-0 z-50 hidden"><div class="modal-backdrop absolute inset-0" onclick="closeModal('modal-add-group')"></div><div class="absolute inset-0 flex items-center justify-center p-4"><div class="card-glass rounded-2xl w-full max-w-md fade-in p-6"><h3 id="modal-group-title" class="text-xl font-bold text-blue-900 mb-4">Tambah Kelompok</h3><form id="form-add-group" class="space-y-4"><input type="hidden" id="input-group-class"><div><label class="block text-sm font-semibold text-gray-700 mb-1">Nama Kelompok</label><input type="text" id="input-group-name" required class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl" placeholder="Contoh: Kelompok 1"></div><div><label class="block text-sm font-semibold text-gray-700 mb-1">Anggota (Kelas <span id="group-class-label" class="font-bold text-blue-700"></span>)</label><div class="flex gap-2 mb-2"><button type="button" id="btn-select-all-members" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-semibold">Pilih Semua</button><button type="button" id="btn-clear-members" class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-lg font-semibold">Kosongkan</button></div><div id="group-members-list" class="max-h-56 overflow-y-auto border-2 border-gray-200 rounded-xl p-2 space-y-1"></div></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal('modal-add-group')" class="flex-1 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl">Batal</button><button type="submit" class="flex-1 btn-primary text-white font-semibold py-2 rounded-xl">Simpan</button></div></form></div></div></div>
+
+  <div id="modal-add-kelompok-penilaian" class="fixed inset-0 z-50 hidden"><div class="modal-backdrop absolute inset-0" onclick="closeModal('modal-add-kelompok-penilaian')"></div><div class="absolute inset-0 flex items-center justify-center p-4"><div class="card-glass rounded-2xl w-full max-w-md fade-in p-6"><h3 class="text-xl font-bold text-blue-900 mb-4">Penilaian Kelompok Baru</h3><form id="form-add-kelompok-penilaian" class="space-y-4"><div><label class="block text-sm font-semibold text-gray-700 mb-1">Judul Penilaian</label><input type="text" id="input-kelompok-penilaian-title" required class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl" placeholder="Contoh: Tugas Kelompok 1"><p class="text-xs text-gray-500 mt-1">Kelas: <span id="penilaian-class-label" class="font-bold text-blue-700"></span></p></div><div class="flex gap-3 pt-2"><button type="button" onclick="closeModal('modal-add-kelompok-penilaian')" class="flex-1 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl">Batal</button><button type="submit" class="flex-1 btn-primary text-white font-semibold py-2 rounded-xl">Simpan</button></div></form></div></div></div>
+
+  <div id="modal-confirm" class="fixed inset-0 z-50 hidden"><div class="modal-backdrop absolute inset-0"></div><div class="absolute inset-0 flex items-center justify-center p-4"><div class="card-glass rounded-2xl w-full max-w-sm fade-in p-6 text-center"><h3 class="text-xl font-bold text-red-700 mb-2">Konfirmasi</h3><p id="confirm-text" class="text-gray-600 mb-6 text-sm">Apakah Anda yakin?</p><div class="flex gap-3"><button onclick="closeModal('modal-confirm')" class="flex-1 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-xl">Batal</button><button id="btn-confirm-delete-action" class="flex-1 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl">Ya, Lanjutkan</button></div></div></div></div>
+
+  <div id="toast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-900/90 text-white px-6 py-3 rounded-xl shadow-xl hidden z-50 font-semibold text-sm"><span id="toast-message">Pesan</span></div>
+</div>
+
+<script>
+  // ================= KONFIGURASI =================
+  const CONFIG = {
+    school_name: 'SMKN 9 Kabupaten Tangerang',
+    teacher_name: 'Arum Widya Safitri, S.Pd',
+    teacher_nip: '199805292024212028',
+    principal_name: 'Evi Resti Rahmayani, S.Pd., M.Pd.',
+    principal_nip: '19770902 200604 2 003',
+    subject_name: 'Matematika',
+    auth: { username: 'admin', password: 'admin123' },
+    kkm: 75,
+    kkm_map: { X: 75, XI: 79, XII: 80 },
+    bobot: { tugas: 0.35, ah: 0.35, pts: 0.20, psas: 0.10 }
+  };
+
+  // ================= SUPABASE =================
+  const SUPABASE_URL = 'https://prtwqltdwdtlhicawjrf.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_rsXy5dEAWGZYmufHuTNBMg_vYwsTu6H';
+  const DATA_ROW_ID = 'main';
+  let supabaseClient = null;
+
+  const CLASS_LIST = ['X AKC 1','X AKC 2','X DKV 1','X DKV 2','X FKK 1','X FKK 2','X MP 1','X MP 2','X TKJ 1','X TKJ 2','X TSM 1','X TSM 2','XI AKC 1','XI AKC 2','XI DKV 1','XI DKV 2','XI FKK 1','XI FKK 2','XI MP 1','XI MP 2','XI TKJ 1','XI TKJ 2','XI TSM 1','XI TSM 2','XII AKC 1','XII AKC 2','XII DKV 1','XII DKV 2','XII FKK 1','XII FKK 2','XII MP 1','XII MP 2','XII TKJ 1','XII TKJ 2','XII TSM 1','XII TSM 2'];
+
+  const SIKAP_ASPECTS = [
+    { key: 'kebersihan',  label: 'Kebersihan' },
+    { key: 'kerapihan',   label: 'Kerapihan' },
+    { key: 'keaktifan',   label: 'Keaktifan' },
+    { key: 'sopan_santun',label: 'Sopan Santun' },
+    { key: 'kolaborasi',  label: 'Kolaborasi' }
+  ];
+  const TUGAS_FIELDS = ['tugas1','tugas2','tugas3','tugas4','tugas5','tugas6'];
+  const AH_FIELDS = ['ah1','ah2','ah3'];
+  const AKADEMIK_FIELDS = [...TUGAS_FIELDS, ...AH_FIELDS, 'pts', 'psas'];
+  const SEMESTERS = [1, 2];
+
+  const STORAGE_KEY = 'kaciw_penilaian_cache_v6';
+  const OLD_KEYS = ['kaciw_penilaian_data_v2', 'kaciw_penilaian_data_v1', 'kaciw_penilaian_cache_v5'];
+  const LOGIN_KEY = 'kaciw_penilaian_login';
+  const KOP_URL = 'https://raw.githubusercontent.com/arumws298/jurnal-kaciw/main/kop-sekolah.png';
+  let KOP_IMAGE = null;
+
+  const store = {
+    get(k)    { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+    del(k)    { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+
+  // ================= STATE =================
+  let allData = { students: [], pertemuan: { sikap: [] }, akademik_semester: [], kelompok: { groups: [], penilaian: [] } };
+  let deleteTarget = null;
+  let editGroupId = null;
+  const editRowId = { sikap: null, akademik: null, kelompok: null };
+
+  // ================= KONEKSI & SYNC SUPABASE =================
+  function connectSupabase() {
+    try { supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); return true; }
+    catch (e) { console.error('Client gagal dibuat', e); return false; }
+  }
+  let syncState = 'idle';
+  let saveTimer = null;
+  let isSyncing = false;
+  let pendingSync = false;
+  function setSyncStatus(status) { syncState = status; }
+
+  function saveData() {
+    store.set(STORAGE_KEY, JSON.stringify(allData));
+    scheduleSync();
+  }
+  function scheduleSync() {
+    if (!supabaseClient) return;
+    setSyncStatus('saving');
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => { syncToSupabase(); }, 1200);
+  }
+  async function syncToSupabase() {
+    if (!supabaseClient) return;
+    if (isSyncing) { pendingSync = true; return; }
+    isSyncing = true;
+    try {
+      const { error } = await supabaseClient
+        .from('penilaian_data')
+        .upsert({ id: DATA_ROW_ID, data: allData, updated_at: new Date().toISOString() });
+      if (error) {
+        if (error.code === '42P01' || String(error.message || '').includes('does not exist')) {
+          setSyncStatus('offline');
+          showToast('❗ Tabel "penilaian_data" belum dibuat di Supabase.');
+        } else { throw error; }
+      } else { setSyncStatus('saved'); }
+    } catch (e) {
+      console.error('Sync gagal:', e);
+      setSyncStatus('offline');
+    } finally {
+      isSyncing = false;
+      if (pendingSync) { pendingSync = false; syncToSupabase(); }
+    }
+  }
+
+  function normalizeData(d) {
+    const nd = { students: [], pertemuan: { sikap: [] }, akademik_semester: [], kelompok: { groups: [], penilaian: [] } };
+    if (!d) return nd;
+    if (Array.isArray(d.students)) nd.students = d.students;
+    if (d.pertemuan && Array.isArray(d.pertemuan.sikap)) nd.pertemuan.sikap = d.pertemuan.sikap;
+    if (Array.isArray(d.akademik_semester)) nd.akademik_semester = d.akademik_semester.filter(r => r && r.class);
+    if (d.kelompok) {
+      if (Array.isArray(d.kelompok.groups)) nd.kelompok.groups = d.kelompok.groups;
+      if (Array.isArray(d.kelompok.penilaian)) nd.kelompok.penilaian = d.kelompok.penilaian;
+    }
+
+    if (!nd.pertemuan.sikap.length && Array.isArray(d.sikap)) {
+      const byClass = {};
+      d.sikap.forEach(r => {
+        const st = nd.students.find(s => s.id === r.student_id);
+        if (!st) return;
+        const sc = {};
+        SIKAP_ASPECTS.forEach(a => { const v = numOf(r[a.key]); if (v !== null) sc[a.key] = v; });
+        if (Object.keys(sc).length) {
+          if (!byClass[st.student_class]) byClass[st.student_class] = {};
+          byClass[st.student_class][r.student_id] = sc;
+        }
+      });
+      Object.keys(byClass).forEach(cls => {
+        nd.pertemuan.sikap.push({ id: generateId(), class: cls, no: 1, created_at: new Date().toISOString(), scores: byClass[cls] });
+      });
+    }
+
+    if (!nd.akademik_semester.length) {
+      const merged = {};
+      const absorb = (cls, sid, fields) => {
+        if (!cls || !sid || !fields) return;
+        if (!merged[cls]) merged[cls] = {};
+        if (!merged[cls][sid]) merged[cls][sid] = {};
+        AKADEMIK_FIELDS.forEach(f => { const v = numOf(fields[f]); if (v !== null) merged[cls][sid][f] = v; });
+      };
+      if (d.pertemuan && Array.isArray(d.pertemuan.akademik)) {
+        d.pertemuan.akademik.forEach(p => {
+          if (!p || !p.scores) return;
+          Object.keys(p.scores).forEach(sid => absorb(p.class, sid, p.scores[sid]));
+        });
+      }
+      if (Array.isArray(d.akademik)) {
+        d.akademik.forEach(r => {
+          const st = nd.students.find(s => s.id === r.student_id);
+          absorb(st ? st.student_class : r.student_class, r.student_id, r);
+        });
+      }
+      Object.keys(merged).forEach(cls => {
+        nd.akademik_semester.push({ id: generateId(), class: cls, semester: 1, scores: merged[cls] });
+      });
+    }
+
+    nd.pertemuan.sikap.forEach(p => { if (!p.scores) p.scores = {}; });
+    nd.akademik_semester.forEach(r => { if (!r.scores) r.scores = {}; r.semester = Number(r.semester) || 1; });
+    return nd;
+  }
+
+  async function loadCloudData() {
+    if (!supabaseClient) return false;
+    try {
+      const { data, error } = await supabaseClient
+        .from('penilaian_data')
+        .select('data')
+        .eq('id', DATA_ROW_ID)
+        .maybeSingle();
+      if (error) {
+        if (error.code === '42P01' || String(error.message || '').includes('does not exist')) {
+          showToast('❗ Tabel belum ada. Jalankan SQL setup di Supabase.');
+          return false;
+        }
+        throw error;
+      }
+      if (data && data.data) {
+        const raw = data.data;
+        const hadLegacy = (raw.pertemuan && Array.isArray(raw.pertemuan.akademik) && raw.pertemuan.akademik.length > 0) ||
+                          (Array.isArray(raw.akademik) && raw.akademik.length > 0) ||
+                          (Array.isArray(raw.sikap) && raw.sikap.length > 0);
+        allData = normalizeData(raw);
+        store.set(STORAGE_KEY, JSON.stringify(allData));
+        setSyncStatus('saved');
+        if (hadLegacy) saveData();
+        return true;
+      }
+      const hasLocal = allData.students.length || allData.pertemuan.sikap.length ||
+                       allData.akademik_semester.length || allData.kelompok.groups.length;
+      if (hasLocal) { await syncToSupabase(); }
+      else { setSyncStatus('saved'); }
+      return true;
+    } catch (e) {
+      console.error('Load cloud gagal:', e);
+      return false;
+    }
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && syncState === 'saving' && supabaseClient) {
+      if (saveTimer) clearTimeout(saveTimer);
+      syncToSupabase();
+    }
+  });
+
+  // ================= INISIALISASI =================
+  function initApp() {
+    try { setupEventListeners(); } catch (e) { console.error(e); }
+    try { setupTheme(); } catch (e) { console.error(e); }
+    try { loadLocalData(); } catch (e) { console.error(e); }
+
+    const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    setTxt('login-school-name', CONFIG.school_name);
+    setTxt('header-school-name', CONFIG.school_name);
+    setTxt('dashboard-teacher-name', CONFIG.teacher_name);
+    setTxt('dashboard-subject', CONFIG.subject_name);
+
+    const b = CONFIG.bobot;
+    document.getElementById('akademik-info').innerHTML =
+      `ℹ️ Pilih semester — baris <b>belum ada nilai</b> langsung bisa diisi, baris <b>sudah ada nilai</b> klik ✏️ untuk ubah.<br>⭐ Kolom <b>SIKAP</b> terisi otomatis dari menu Penilaian SIKAP dan <b>masuk ke rata-rata Asesmen Harian</b>.<br>📊 <b>NA per Semester = ${(b.tugas*100)}% Rata Tugas + ${(b.ah*100)}% Rata AH (termasuk SIKAP) + ${(b.pts*100)}% PTS + ${(b.psas*100)}% PSAS</b>. Nilai Akhir (Gabungan) = rata-rata NA semester yang terisi.<br>🎯 KKM: X = 75, XI = 79, XII = 80. ☁️ Tersimpan otomatis.`;
+
+    const classSel = document.getElementById('input-student-class');
+    if (classSel) classSel.innerHTML = '<option value="">Pilih Kelas</option>' + CLASS_LIST.map(c => `<option value="${c}">${c}</option>`).join('');
+
+    try { updateClassDropdowns(); } catch (e) { console.error(e); }
+    try { updateDashboard(); } catch (e) { console.error(e); }
+
+    if (store.get(LOGIN_KEY) === '1') {
+      document.getElementById('login-page').classList.add('hidden');
+      document.getElementById('dashboard-page').classList.remove('hidden');
+    }
+
+    loadKopImage().catch(e => console.warn('KOP tidak tersedia', e));
+
+    if (connectSupabase()) {
+      loadCloudData().then(ok => {
+        if (ok) {
+          updateClassDropdowns();
+          renderStudents(); renderSikap(); renderAkademik(); renderKelompok(); renderRekapNilai();
+          updateDashboard();
+        }
+      });
+    }
+  }
+// ================= NAVIGASI INPUT NILAI DENGAN ENTER / SPASI =================
+document.addEventListener('keydown', function(e) {
+  // Hanya bekerja pada input nilai
+  const current = e.target.closest(
+    'input.akad-input, input.kelompok-input, select.sikap-select'
+  );
+
+  if (!current) return;
+
+  // Enter atau Spasi
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+
+  // Jangan biarkan Enter/Spasi melakukan fungsi bawaan browser
+  e.preventDefault();
+
+  // Untuk select SIKAP, gunakan data-key
+  const key = current.dataset.key;
+
+  // Cari semua input/select pada kolom yang sama
+  let fields = [];
+
+  if (current.classList.contains('akad-input')) {
+    fields = [...document.querySelectorAll(
+      `input.akad-input[data-key="${key}"]`
+    )];
+  }
+
+  else if (current.classList.contains('kelompok-input')) {
+    const penilaian = current.dataset.penilaian;
+
+    fields = [...document.querySelectorAll(
+      `input.kelompok-input[data-penilaian="${penilaian}"]`
+    )];
+  }
+
+  else if (current.classList.contains('sikap-select')) {
+    fields = [...document.querySelectorAll(
+      `select.sikap-select[data-key="${key}"]`
+    )];
+  }
+
+  // Cari posisi input yang sedang aktif
+  const index = fields.indexOf(current);
+
+  // Kalau masih ada baris berikutnya
+  if (index >= 0 && index < fields.length - 1) {
+    const next = fields[index + 1];
+
+    // Simpan perubahan nilai sebelum pindah
+    current.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // Fokus ke input berikutnya
+    setTimeout(() => {
+      next.focus();
+
+      // Untuk input angka, blok angka yang sudah ada agar mudah diganti
+      if (next.tagName === 'INPUT') {
+        next.select();
+      }
+    }, 50);
+  } 
+  else {
+    // Jika sudah di baris terakhir, simpan saja
+    current.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+});
+  
+  document.addEventListener('DOMContentLoaded', initApp);
+  if (document.readyState !== 'loading') initApp();
+
+  function loadLocalData() {
+    let raw = store.get(STORAGE_KEY);
+    if (!raw) raw = OLD_KEYS.map(k => store.get(k)).find(v => v);
+    if (!raw) return;
+    try { allData = normalizeData(JSON.parse(raw)); } catch (e) { console.error(e); }
+  }
+
+  async function loadKopImage() {
+    const response = await fetch(KOP_URL);
+    if (!response.ok) throw new Error('KOP tidak ditemukan');
+    const blob = await response.blob();
+    KOP_IMAGE = await new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  // ================= HELPER =================
+  function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 9); }
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-message').textContent = msg;
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 3000);
+  }
+  function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+  function closeModal(id) { document.getElementById(id).classList.add('hidden'); if (id === 'modal-add-group') editGroupId = null; }
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+  function byName(a, b) { return a.student_name.localeCompare(b.student_name, 'id', { sensitivity: 'base', numeric: true }); }
+  function numOf(v) { return (v === null || v === undefined || v === '' || isNaN(Number(v))) ? null : Number(v); }
+  function round1(x) { return Math.round(x * 10) / 10; }
+  function todayStr() { return new Date().toISOString().split('T')[0]; }
+  function safeName(s) { return String(s).replace(/\s+/g, '_'); }
+  function formatDateSignature(dateStr) {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  function fmtNilai(n) {
+    if (n === null || n === undefined) return '-';
+    const r = round1(n);
+    return Number.isInteger(r) ? String(r) : r.toFixed(1);
+  }
+  function getGradeLevel(className) {
+    const c = String(className || '').trim().toUpperCase();
+    if (c.startsWith('XII')) return 'XII';
+    if (c.startsWith('XI')) return 'XI';
+    return 'X';
+  }
+  function getKKM(className) { return CONFIG.kkm_map[getGradeLevel(className)] ?? CONFIG.kkm; }
+  function nilaiCellHtml(nilai, kkm) {
+    if (nilai === null || nilai === undefined) return '<span class="text-gray-400">-</span>';
+    if (kkm === null || kkm === undefined) {
+      return `<span class="px-2 py-1 rounded-lg font-bold bg-indigo-100 text-indigo-700">${fmtNilai(nilai)}</span>`;
+    }
+    const ok = nilai >= kkm;
+    return `<span class="px-2 py-1 rounded-lg font-bold ${ok ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${fmtNilai(nilai)}</span>`;
+  }
+  function predikatBadge(pred) {
+    if (!pred || pred === '-') return '<span class="text-gray-400">-</span>';
+    const map = { A:'bg-green-100 text-green-700', B:'bg-blue-100 text-blue-700', C:'bg-yellow-100 text-yellow-700', D:'bg-orange-100 text-orange-700', E:'bg-red-100 text-red-700' };
+    return `<span class="px-2 py-0.5 rounded-full text-xs font-bold ${map[pred.charAt(0)] || 'bg-gray-100 text-gray-600'}">${pred}</span>`;
+  }
+  function getClasses() { return [...new Set(allData.students.map(s => s.student_class))].sort(); }
+  function getSortedStudents(filterClass) {
+    let st = [...allData.students].sort(byName);
+    if (filterClass) st = st.filter(s => s.student_class === filterClass);
+    return st;
+  }
+
+  // ================= RUMUS =================
+  function getSikapPertemuans(cls) { return allData.pertemuan.sikap.filter(p => p.class === cls).sort((a, b) => a.no - b.no); }
+  function nextPertemuanNo(list) { return list.length ? Math.max(...list.map(p => p.no || 0)) + 1 : 1; }
+
+  function predikatSikap(nilai) {
+    if (nilai >= 90) return 'A - Sangat Baik';
+    if (nilai >= 80) return 'B - Baik';
+    if (nilai >= 70) return 'C - Cukup';
+    return 'D - Perlu Bimbingan';
+  }
+  function predikatAkademik(nilai) {
+    if (nilai >= 90) return 'A - Sangat Baik';
+    if (nilai >= 80) return 'B - Baik';
+    if (nilai >= 70) return 'C - Cukup';
+    if (nilai >= 60) return 'D - Kurang';
+    return 'E - Sangat Kurang';
+  }
+  function hitungSikapPertemuan(scores) {
+    const res = { total: 0, nilai: null };
+    if (!scores) return res;
+    const filled = SIKAP_ASPECTS.some(a => numOf(scores[a.key]) !== null);
+    if (!filled) return res;
+    res.total = SIKAP_ASPECTS.reduce((s, a) => s + (numOf(scores[a.key]) || 0), 0);
+    res.nilai = round1((res.total / 25) * 100);
+    return res;
+  }
+  function hitungSikapFinal(studentId, cls) {
+    const vals = getSikapPertemuans(cls).map(p => {
+      const sc = p.scores[studentId];
+      return sc ? hitungSikapPertemuan(sc).nilai : null;
+    }).filter(v => v !== null);
+    if (!vals.length) return null;
+    return round1(vals.reduce((a, b) => a + b, 0) / vals.length);
+  }
+
+  function getAkadRec(cls, sem) {
+    return allData.akademik_semester.find(r => r.class === cls && Number(r.semester) === Number(sem)) || null;
+  }
+  function ensureAkadRec(cls, sem) {
+    let rec = getAkadRec(cls, sem);
+    if (!rec) {
+      rec = { id: generateId(), class: cls, semester: Number(sem), scores: {} };
+      allData.akademik_semester.push(rec);
+    }
+    return rec;
+  }
+  function avgOf(rec, fields) {
+    const vals = fields.map(f => numOf(rec[f])).filter(v => v !== null);
+    if (!vals.length) return null;
+    return vals.reduce((a, b) => a + b, 0) / vals.length;
+  }
+  // ===== AH TERMASUK NILAI SIKAP =====
+  function hitungAkademik(sc, sikapScore) {
+    const res = { rataTugas: null, rataAH: null, nilai: null, predikat: '-', sikap: null };
+    if (!sc) sc = {};
+    res.sikap = numOf(sikapScore);
+    res.rataTugas = avgOf(sc, TUGAS_FIELDS);
+    const ahVals = AH_FIELDS.map(f => numOf(sc[f])).filter(v => v !== null);
+    if (res.sikap !== null) ahVals.push(res.sikap);
+    res.rataAH = ahVals.length ? ahVals.reduce((a, b) => a + b, 0) / ahVals.length : null;
+    const pts = numOf(sc.pts), psas = numOf(sc.psas);
+    const parts = [];
+    if (res.rataTugas !== null) parts.push({ v: res.rataTugas, w: CONFIG.bobot.tugas });
+    if (res.rataAH !== null)    parts.push({ v: res.rataAH,    w: CONFIG.bobot.ah });
+    if (pts !== null)           parts.push({ v: pts,           w: CONFIG.bobot.pts });
+    if (psas !== null)          parts.push({ v: psas,          w: CONFIG.bobot.psas });
+    if (!parts.length) return res;
+    const wSum = parts.reduce((s, p) => s + p.w, 0);
+    res.nilai = round1(parts.reduce((s, p) => s + p.v * p.w, 0) / wSum);
+    res.predikat = predikatAkademik(res.nilai);
+    return res;
+  }
+  function hitungAkademikSemester(studentId, cls, sem) {
+    const rec = getAkadRec(cls, sem);
+    const sc = (rec && rec.scores[studentId]) || {};
+    const sikapScore = hitungSikapFinal(studentId, cls);
+    return hitungAkademik(sc, sikapScore);
+  }
+  function hitungAkademikFinal(studentId, cls) {
+    const vals = SEMESTERS.map(sem => hitungAkademikSemester(studentId, cls, sem).nilai).filter(v => v !== null);
+    if (!vals.length) return null;
+    return round1(vals.reduce((a, b) => a + b, 0) / vals.length);
+  }
+
+  // ================= NAVIGASI =================
+  const PAGES = ['manajemen-siswa','penilaian-sikap','penilaian-akademik','penilaian-kelompok','rekap-nilai'];
+  function showPage(pageId) {
+    document.getElementById('main-dashboard').classList.add('hidden');
+    PAGES.forEach(p => document.getElementById(p + '-page').classList.add('hidden'));
+    if (pageId === 'main') {
+      document.getElementById('main-dashboard').classList.remove('hidden');
+    } else {
+      document.getElementById(pageId + '-page').classList.remove('hidden');
+      if (pageId === 'manajemen-siswa') renderStudents();
+      if (pageId === 'penilaian-sikap') renderSikap();
+      if (pageId === 'penilaian-akademik') renderAkademik();
+      if (pageId === 'penilaian-kelompok') renderKelompok();
+      if (pageId === 'rekap-nilai') renderRekapNilai();
+    }
+    window.scrollTo({ top: 0 });
+  }
+  // Pastikan fungsi navigasi tersedia untuk tombol Kembali yang memakai onclick inline.
+  window.showPage = showPage;
+
+  function updateClassDropdowns() {
+    const classes = getClasses();
+    const pick = '<option value="">Pilih Kelas</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
+    const all = '<option value="">Semua Kelas</option>' + classes.map(c => `<option value="${c}">${c}</option>`).join('');
+    ['select-sikap-class','select-akademik-class','select-kelompok-class'].forEach(id => {
+      const el = document.getElementById(id); const cur = el.value;
+      el.innerHTML = pick; if (classes.includes(cur)) el.value = cur;
+    });
+    ['filter-rekap-nilai-class','filter-student-class'].forEach(id => {
+      const el = document.getElementById(id); const cur = el.value;
+      el.innerHTML = all; if (classes.includes(cur)) el.value = cur;
+    });
+  }
+
+  // ================= LOGIN / LOGOUT =================
+  function handleLogin(e) {
+    e.preventDefault();
+    const u = (document.getElementById('login-username').value || '').trim().toLowerCase();
+    const p = (document.getElementById('login-password').value || '').trim().toLowerCase();
+    if (u === String(CONFIG.auth.username).toLowerCase() && p === String(CONFIG.auth.password).toLowerCase()) {
+      store.set(LOGIN_KEY, '1');
+      document.getElementById('login-page').classList.add('hidden');
+      document.getElementById('dashboard-page').classList.remove('hidden');
+      document.getElementById('login-error').classList.add('hidden');
+      document.getElementById('login-form').reset();
+      showToast('Login berhasil! Selamat datang 👋');
+    } else {
+      document.getElementById('login-error').classList.remove('hidden');
+    }
+  }
+  function handleLogout() {
+    if (saveTimer) clearTimeout(saveTimer);
+    if (supabaseClient) syncToSupabase();
+    store.del(LOGIN_KEY);
+    document.getElementById('dashboard-page').classList.add('hidden');
+    document.getElementById('login-page').classList.remove('hidden');
+    document.getElementById('login-error').classList.add('hidden');
+  }
+
+  function setupTheme() {
+    const btn = document.getElementById('btn-theme');
+    if ((store.get('theme') || 'light') === 'dark') { document.body.classList.add('dark'); btn.textContent = '☀️'; }
+    btn.onclick = function() {
+      document.body.classList.toggle('dark');
+      const dark = document.body.classList.contains('dark');
+      store.set('theme', dark ? 'dark' : 'light');
+      btn.textContent = dark ? '☀️' : '🌙';
+    };
+  }
+
+  // ================= DASHBOARD =================
+  function updateDashboard() {
+    const sFinals = allData.students.map(s => hitungSikapFinal(s.id, s.student_class)).filter(v => v !== null);
+    const aFinals = allData.students.map(s => hitungAkademikFinal(s.id, s.student_class)).filter(v => v !== null);
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('dashboard-total-students', allData.students.length);
+    set('dashboard-total-classes', new Set(allData.students.map(s => s.student_class)).size);
+    set('dashboard-total-groups', allData.kelompok.groups.length);
+    set('dashboard-total-pertemuan', allData.pertemuan.sikap.length);
+    set('dashboard-sikap-done', sFinals.length);
+    set('dashboard-akademik-done', aFinals.length);
+    set('dashboard-rata-sikap', sFinals.length ? fmtNilai(round1(sFinals.reduce((a,b)=>a+b,0)/sFinals.length)) : '-');
+    set('dashboard-rata-akademik', aFinals.length ? fmtNilai(round1(aFinals.reduce((a,b)=>a+b,0)/aFinals.length)) : '-');
+  }
+
+  // ================= MANAJEMEN SISWA =================
+  function renderStudents() {
+    const filterClass = document.getElementById('filter-student-class').value;
+    const students = getSortedStudents(filterClass);
+    const tbody = document.getElementById('student-table-body');
+    document.getElementById('total-students-count').textContent = students.length;
+    if (!students.length) { tbody.innerHTML = ''; document.getElementById('student-empty-state').classList.remove('hidden'); return; }
+    document.getElementById('student-empty-state').classList.add('hidden');
+    tbody.innerHTML = students.map((s, i) => `
+      <tr class="border-b border-gray-100 hover:bg-blue-50 transition-colors">
+        <td class="px-4 py-3 text-gray-600">${i+1}</td>
+        <td class="px-4 py-3 font-semibold text-gray-900">${escapeHtml(s.student_name)}</td>
+        <td class="px-4 py-3"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">${escapeHtml(s.student_class)}</span></td>
+        <td class="px-4 py-3 text-center"><button onclick="confirmDeleteStudent('${s.id}')" class="text-red-500 hover:text-red-700 font-bold text-xl leading-none" title="Hapus">&times;</button></td>
+      </tr>`).join('');
+  }
+  function refreshStudentsUI() { renderStudents(); updateClassDropdowns(); updateDashboard(); }
+  function addStudent(e) {
+    e.preventDefault();
+    const name = document.getElementById('input-student-name').value.trim();
+    const cls = document.getElementById('input-student-class').value;
+    if (!name || !cls) return;
+    if (allData.students.some(s => s.student_name.toLowerCase() === name.toLowerCase() && s.student_class === cls)) {
+      showToast('Siswa sudah terdaftar di kelas ini'); return;
+    }
+    allData.students.push({ id: generateId(), student_name: name, student_class: cls, created_at: new Date().toISOString() });
+    saveData();
+    document.getElementById('form-add-student').reset();
+    closeModal('modal-add-student');
+    refreshStudentsUI();
+    showToast('Siswa berhasil ditambahkan ☁️');
+  }
+  function downloadTemplate() {
+    // Template mengikuti kelas yang sedang dipilih pada Filter Berdasarkan Kelas.
+    const cls = document.getElementById('filter-student-class').value;
+    if (!cls) {
+      showToast('Pilih kelas terlebih dahulu untuk membuat template kelas tersebut');
+      return;
+    }
+
+    const wb = XLSX.utils.book_new();
+    const rows = [['Nama Siswa','Kelas']];
+
+    // Jika kelas sudah memiliki siswa, nama siswa dimasukkan ke template agar
+    // guru dapat melengkapi/mengoreksi data tanpa mengubah kelas.
+    const students = getSortedStudents(cls);
+    if (students.length) {
+      students.forEach(s => rows.push([s.student_name, cls]));
+      // Tambahkan beberapa baris kosong untuk siswa baru.
+      for (let i = 0; i < 5; i++) rows.push(['', cls]);
+    } else {
+      // Kelas belum memiliki siswa: sediakan 35 baris kosong dengan kelas sudah terisi.
+      for (let i = 0; i < 35; i++) rows.push(['', cls]);
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [{wch:32},{wch:18}];
+    XLSX.utils.book_append_sheet(wb, ws, 'Data Siswa');
+    XLSX.writeFile(wb, `Template_Import_Siswa_${safeName(cls)}.xlsx`);
+    showToast(`Template ${cls} berhasil dibuat 📥`);
+  }
+  function handleImportExcel(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' });
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        let imported = 0, skipped = 0;
+        rows.forEach(row => {
+          const name = row['Nama Siswa'] || row['Nama'] || row['nama'] || row['student_name'];
+          const cls = row['Kelas'] || row['kelas'] || row['student_class'];
+          if (name && cls) {
+            const n = String(name).trim(), c = String(cls).trim();
+            if (allData.students.some(s => s.student_name.toLowerCase() === n.toLowerCase() && s.student_class === c)) { skipped++; return; }
+            allData.students.push({ id: generateId(), student_name: n, student_class: c, created_at: new Date().toISOString() });
+            imported++;
+          }
+        });
+        saveData(); refreshStudentsUI();
+        showToast(imported ? `${imported} siswa diimport${skipped ? `, ${skipped} duplikat dilewati` : ''} ☁️` : 'Tidak ada data valid ditemukan');
+      } catch (err) { showToast('Gagal membaca file Excel'); }
+      e.target.value = '';
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  // ================= PENILAIAN SIKAP =================
+  function renderSikap() {
+    const cls = document.getElementById('select-sikap-class').value;
+    const pertList = cls ? getSikapPertemuans(cls) : [];
+    const selP = document.getElementById('select-sikap-pertemuan');
+    const curP = selP.value;
+    selP.innerHTML = pertList.length
+      ? pertList.map(p => `<option value="${p.id}">Pertemuan ${p.no}</option>`).join('')
+      : '<option value="">- Belum ada pertemuan -</option>';
+    if (pertList.some(p => p.id === curP)) selP.value = curP;
+    else if (pertList.length) selP.value = pertList[pertList.length - 1].id;
+
+    const tbody = document.getElementById('sikap-table-body');
+    const empty = document.getElementById('sikap-empty-state');
+    const emptyText = document.getElementById('sikap-empty-text');
+    const pid = selP.value;
+    const pRec = pid ? allData.pertemuan.sikap.find(p => p.id === pid) : null;
+
+    if (!cls) { tbody.innerHTML = ''; emptyText.textContent = 'Pilih kelas untuk mulai menilai SIKAP'; empty.classList.remove('hidden'); }
+    else if (!pertList.length) { tbody.innerHTML = ''; emptyText.textContent = 'Belum ada pertemuan. Klik "+ Pertemuan" untuk membuat.'; empty.classList.remove('hidden'); }
+    else {
+      empty.classList.add('hidden');
+      const students = allData.students.filter(s => s.student_class === cls).sort(byName);
+      if (!students.length) { tbody.innerHTML = ''; emptyText.textContent = 'Belum ada siswa di kelas ' + cls; empty.classList.remove('hidden'); }
+      else {
+        tbody.innerHTML = students.map((s, i) => {
+          const sc = (pRec && pRec.scores[s.id]) || {};
+          const c = hitungSikapPertemuan(sc);
+          const hasData = sc && SIKAP_ASPECTS.some(a => numOf(sc[a.key]) !== null);
+          const isEdit = editRowId.sikap === s.id;
+          const dis = (hasData && !isEdit) ? 'disabled' : '';
+
+  const cells = SIKAP_ASPECTS.map(a => {
+  const v = sc ? sc[a.key] : null;
+
+  return `
+    <td class="px-2 py-2 text-center">
+      <input
+        type="number"
+        min="1"
+        max="5"
+        step="1"
+        inputmode="numeric"
+        ${dis}
+        value="${v ?? ''}"
+        placeholder="-"
+        onchange="onSikapChange('${s.id}')"
+        oninput="if(this.value !== '') this.value = Math.max(1, Math.min(5, Number(this.value)))"
+        data-student="${s.id}"
+        data-key="${a.key}"
+        class="sikap-select w-16 px-2 py-2 text-center border border-gray-300 rounded-lg font-semibold bg-white"
+      >
+    </td>`;
+}).join('');
+          const aksi = isEdit
+            ? `<button onclick="saveSikapRow('${s.id}')" class="btn-row-save" title="Simpan baris ini">💾</button>`
+            : (hasData ? `<button onclick="editSikapRow('${s.id}')" class="btn-row-edit" title="Ubah nilai baris ini">✏️</button>` : '');
+          return `<tr class="border-b border-gray-100 hover:bg-blue-50 transition-colors ${isEdit ? 'row-editing' : ''}">
+            <td class="px-2 py-2 text-gray-600">${i+1}</td>
+            <td class="px-3 py-2 font-semibold text-gray-900 whitespace-nowrap">${escapeHtml(s.student_name)}</td>
+            ${cells}
+            <td class="px-2 py-2 text-center font-bold text-gray-800" id="sikap-total-${s.id}">${c.nilai === null ? '-' : c.total}</td>
+            <td class="px-2 py-2 text-center" id="sikap-nilai-${s.id}">${nilaiCellHtml(c.nilai, null)}</td>
+            <td class="px-2 py-2 text-center">${aksi}</td>
+          </tr>`;
+        }).join('');
+      }
+    }
+    renderSikapAkumulasi(cls);
+  }
+  function editSikapRow(studentId) {
+    editRowId.sikap = studentId;
+    renderSikap();
+    showToast('✏️ Baris terbuka — ubah skor lalu klik 💾');
+  }
+  function saveSikapRow(studentId) {
+    const pid = document.getElementById('select-sikap-pertemuan').value;
+    const p = allData.pertemuan.sikap.find(x => x.id === pid);
+    if (p) {
+      if (!p.scores[studentId]) p.scores[studentId] = {};
+      document.querySelectorAll(`.sikap-select[data-student="${studentId}"]`).forEach(sel => {
+        p.scores[studentId][sel.dataset.key] = sel.value === '' ? null : Number(sel.value);
+      });
+    }
+    editRowId.sikap = null;
+    saveData(); renderSikap(); renderAkademik(); updateDashboard();
+    showToast('✅ Nilai tersimpan & terkunci ☁️');
+  }
+  function onSikapChange(studentId) {
+    const cls = document.getElementById('select-sikap-class').value;
+    const pid = document.getElementById('select-sikap-pertemuan').value;
+    const p = allData.pertemuan.sikap.find(x => x.id === pid);
+    if (!p) return;
+    if (!p.scores[studentId]) p.scores[studentId] = {};
+    document.querySelectorAll(`.sikap-select[data-student="${studentId}"]`).forEach(sel => {
+      p.scores[studentId][sel.dataset.key] = sel.value === '' ? null : Number(sel.value);
+    });
+    const c = hitungSikapPertemuan(p.scores[studentId]);
+    document.getElementById(`sikap-total-${studentId}`).textContent = c.nilai === null ? '-' : c.total;
+    document.getElementById(`sikap-nilai-${studentId}`).innerHTML = nilaiCellHtml(c.nilai, null);
+    saveData();
+    renderSikapAkumulasi(cls);
+    renderAkademik();
+    renderRekapNilai();
+    updateDashboard();
+  }
+  function renderSikapAkumulasi(cls) {
+    const thead = document.getElementById('sikap-akum-thead');
+    const tbody = document.getElementById('sikap-akum-body');
+    const empty = document.getElementById('sikap-akum-empty');
+    document.getElementById('sikap-akum-class').textContent = cls ? `(Kelas ${cls})` : '';
+    if (!cls) { thead.innerHTML = ''; tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+    const pert = getSikapPertemuans(cls);
+    const students = allData.students.filter(s => s.student_class === cls).sort(byName);
+    if (!pert.length || !students.length) { thead.innerHTML = ''; tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+    thead.innerHTML = `<tr>
+      <th class="px-2 py-2 text-left text-xs font-bold">No</th>
+      <th class="px-3 py-2 text-left text-xs font-bold">Nama Siswa</th>
+      ${pert.map(p => `<th class="px-2 py-2 text-center text-xs font-bold">P${p.no}</th>`).join('')}
+      <th class="px-2 py-2 text-center text-xs font-bold bg-purple-700">Akumulasi</th>
+      <th class="px-2 py-2 text-center text-xs font-bold bg-purple-700">Predikat</th>
+    </tr>`;
+    tbody.innerHTML = students.map((s, i) => {
+      const per = pert.map(p => {
+        const sc = p.scores[s.id];
+        const v = sc ? hitungSikapPertemuan(sc).nilai : null;
+        return `<td class="px-2 py-2 text-center text-gray-700">${v === null ? '-' : fmtNilai(v)}</td>`;
+      }).join('');
+      const fin = hitungSikapFinal(s.id, cls);
+      return `<tr class="border-b border-gray-100 hover:bg-purple-50 transition-colors">
+        <td class="px-2 py-2 text-gray-600">${i+1}</td>
+        <td class="px-3 py-2 font-semibold text-gray-900 whitespace-nowrap">${escapeHtml(s.student_name)}</td>
+        ${per}
+        <td class="px-2 py-2 text-center bg-purple-50">${nilaiCellHtml(fin, null)}</td>
+        <td class="px-2 py-2 text-center text-xs">${predikatBadge(fin === null ? '-' : predikatSikap(fin))}</td>
+      </tr>`;
+    }).join('');
+  }
+  function addSikapPertemuan() {
+    const cls = document.getElementById('select-sikap-class').value;
+    if (!cls) { showToast('Pilih kelas terlebih dahulu'); return; }
+    const no = nextPertemuanNo(getSikapPertemuans(cls));
+    allData.pertemuan.sikap.push({ id: generateId(), class: cls, no, created_at: new Date().toISOString(), scores: {} });
+    saveData(); renderSikap(); updateDashboard();
+    showToast(`Pertemuan ${no} (SIKAP) ditambahkan ☁️`);
+  }
+  function confirmDeleteSikapPertemuan() {
+    const cls = document.getElementById('select-sikap-class').value;
+    const pid = document.getElementById('select-sikap-pertemuan').value;
+    if (!cls || !pid) { showToast('Pilih kelas & pertemuan terlebih dahulu'); return; }
+    const p = allData.pertemuan.sikap.find(x => x.id === pid);
+    deleteTarget = { type: 'sikap_pertemuan', id: pid };
+    openConfirm(`Hapus SIKAP Pertemuan ${p ? p.no : ''} kelas ${cls}?`);
+  }
+
+  // ================= PENILAIAN AKADEMIK =================
+  function renderAkademik() {
+    const cls = document.getElementById('select-akademik-class').value;
+    const sem = Number(document.getElementById('select-akademik-semester').value) || 1;
+    const tbody = document.getElementById('akademik-table-body');
+    const empty = document.getElementById('akademik-empty-state');
+    const emptyText = document.getElementById('akademik-empty-text');
+
+    if (!cls) { tbody.innerHTML = ''; emptyText.textContent = 'Pilih kelas untuk mulai menilai'; empty.classList.remove('hidden'); }
+    else {
+      const students = allData.students.filter(s => s.student_class === cls).sort(byName);
+      if (!students.length) { tbody.innerHTML = ''; emptyText.textContent = 'Belum ada siswa di kelas ' + cls; empty.classList.remove('hidden'); }
+      else {
+        empty.classList.add('hidden');
+        const rec = getAkadRec(cls, sem);
+        const kkm = getKKM(cls);
+        tbody.innerHTML = students.map((s, i) => {
+          const sc = (rec && rec.scores[s.id]) || {};
+          const sikapVal = hitungSikapFinal(s.id, cls);
+          const c = hitungAkademik(sc, sikapVal);
+          const hasData = sc && AKADEMIK_FIELDS.some(f => numOf(sc[f]) !== null);
+          const isEdit = editRowId.akademik === s.id;
+          const dis = (hasData && !isEdit) ? 'disabled' : '';
+          const numCell = f => {
+            const v = sc ? sc[f] : null;
+            return `<td class="px-1 py-2 text-center"><input type="number" min="0" max="100" inputmode="numeric" ${dis} value="${v ?? ''}" onchange="onAkademikChange('${s.id}')" data-student="${s.id}" data-key="${f}" class="akad-input"></td>`;
+          };
+          const aksi = isEdit
+            ? `<button onclick="saveAkademikRow('${s.id}')" class="btn-row-save" title="Simpan baris ini">💾</button>`
+            : (hasData ? `<button onclick="editAkademikRow('${s.id}')" class="btn-row-edit" title="Ubah nilai baris ini">✏️</button>` : '');
+          return `<tr class="border-b border-gray-100 hover:bg-blue-50 transition-colors ${isEdit ? 'row-editing' : ''}">
+            <td class="px-2 py-2 text-gray-600">${i+1}</td>
+            <td class="px-3 py-2 font-semibold text-gray-900 whitespace-nowrap">${escapeHtml(s.student_name)}</td>
+            ${TUGAS_FIELDS.map(numCell).join('')}
+            ${AH_FIELDS.map(numCell).join('')}
+            <td class="px-2 py-2 text-center"><div class="sikap-auto">${sikapVal === null ? '-' : fmtNilai(sikapVal)}</div></td>
+            ${numCell('pts')}
+            ${numCell('psas')}
+            <td class="px-2 py-2 text-center bg-blue-50" id="akad-na-${s.id}">${nilaiCellHtml(c.nilai, kkm)}</td>
+            <td class="px-2 py-2 text-center">${aksi}</td>
+          </tr>`;
+        }).join('');
+      }
+    }
+    renderAkademikRekap(cls);
+  }
+  function editAkademikRow(studentId) {
+    editRowId.akademik = studentId;
+    renderAkademik();
+    showToast('✏️ Baris terbuka — ubah nilai lalu klik 💾');
+  }
+  function saveAkademikRow(studentId) {
+    const cls = document.getElementById('select-akademik-class').value;
+    const sem = Number(document.getElementById('select-akademik-semester').value) || 1;
+    if (!cls) return;
+    const rec = ensureAkadRec(cls, sem);
+    if (!rec.scores[studentId]) rec.scores[studentId] = {};
+    document.querySelectorAll(`input.akad-input[data-student="${studentId}"]`).forEach(inp => {
+      const f = inp.dataset.key;
+      if (inp.value === '') { if (numOf(rec.scores[studentId][f]) !== null) delete rec.scores[studentId][f]; return; }
+      let n = Number(inp.value);
+      if (isNaN(n)) { inp.value = ''; return; }
+      n = Math.max(0, Math.min(100, n));
+      inp.value = String(n);
+      rec.scores[studentId][f] = n;
+    });
+    editRowId.akademik = null;
+    saveData(); renderAkademik(); updateDashboard();
+    showToast('✅ Nilai tersimpan & terkunci ☁️');
+  }
+  function onAkademikChange(studentId) {
+    const cls = document.getElementById('select-akademik-class').value;
+    const sem = Number(document.getElementById('select-akademik-semester').value) || 1;
+    if (!cls) return;
+    const rec = ensureAkadRec(cls, sem);
+    if (!rec.scores[studentId]) rec.scores[studentId] = {};
+    document.querySelectorAll(`input.akad-input[data-student="${studentId}"]`).forEach(inp => {
+      const f = inp.dataset.key;
+      if (inp.value === '') { if (numOf(rec.scores[studentId][f]) !== null) delete rec.scores[studentId][f]; return; }
+      let n = Number(inp.value);
+      if (isNaN(n)) { inp.value = ''; return; }
+      n = Math.max(0, Math.min(100, n));
+      inp.value = String(n);
+      rec.scores[studentId][f] = n;
+    });
+    const c = hitungAkademik(rec.scores[studentId] || {}, hitungSikapFinal(studentId, cls));
+    const el = document.getElementById(`akad-na-${studentId}`);
+    if (el) el.innerHTML = nilaiCellHtml(c.nilai, getKKM(cls));
+    saveData();
+    renderAkademikRekap(cls);
+    updateDashboard();
+  }
+  function renderAkademikRekap(cls) {
+    const tbody = document.getElementById('akademik-akum-body');
+    const empty = document.getElementById('akademik-akum-empty');
+    document.getElementById('akademik-akum-class').textContent = cls ? `(Kelas ${cls})` : '';
+    if (!cls) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+    const students = allData.students.filter(s => s.student_class === cls).sort(byName);
+    const any = students.some(s => SEMESTERS.some(sem => hitungAkademikSemester(s.id, cls, sem).nilai !== null));
+    if (!students.length || !any) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+    const kkm = getKKM(cls);
+    tbody.innerHTML = students.map((s, i) => {
+      const s1 = hitungAkademikSemester(s.id, cls, 1).nilai;
+      const s2 = hitungAkademikSemester(s.id, cls, 2).nilai;
+      const fin = hitungAkademikFinal(s.id, cls);
+      return `<tr class="border-b border-gray-100 hover:bg-emerald-50 transition-colors">
+        <td class="px-2 py-2 text-gray-600">${i+1}</td>
+        <td class="px-3 py-2 font-semibold text-gray-900 whitespace-nowrap">${escapeHtml(s.student_name)}</td>
+        <td class="px-2 py-2 text-center">${nilaiCellHtml(s1, kkm)}</td>
+        <td class="px-2 py-2 text-center">${nilaiCellHtml(s2, kkm)}</td>
+        <td class="px-2 py-2 text-center bg-emerald-50">${nilaiCellHtml(fin, kkm)}</td>
+        <td class="px-2 py-2 text-center text-xs bg-emerald-50">${predikatBadge(fin === null ? '-' : predikatAkademik(fin))}</td>
+      </tr>`;
+    }).join('');
+  }
+  function confirmResetAkademik() {
+    const cls = document.getElementById('select-akademik-class').value;
+    if (!cls) { showToast('Pilih kelas terlebih dahulu'); return; }
+    deleteTarget = { type: 'reset_akademik', className: cls };
+    openConfirm(`Hapus SEMUA nilai Akademik (Semester 1 & 2) kelas ${cls}? (Nilai SIKAP tidak terhapus)`);
+  }
+
+  // ================= PENILAIAN KELOMPOK =================
+  function getGroupAvg(groupId) {
+    const group = allData.kelompok.groups.find(g => g.id === groupId);
+    if (!group) return null;
+    const vals = allData.kelompok.penilaian
+      .filter(p => p.class === group.class)
+      .map(p => numOf(p.scores ? p.scores[groupId] : null))
+      .filter(v => v !== null);
+    if (!vals.length) return null;
+    return round1(vals.reduce((a, b) => a + b, 0) / vals.length);
+  }
+  function getStudentGroup(student) {
+    return allData.kelompok.groups.find(g => g.class === student.student_class && g.members.some(m => m.id === student.id)) || null;
+  }
+  function getStudentKelompokScore(student) {
+    const g = getStudentGroup(student);
+    return g ? getGroupAvg(g.id) : null;
+  }
+  function renderKelompok() {
+    const cls = document.getElementById('select-kelompok-class').value;
+    const listEl = document.getElementById('kelompok-groups-list');
+    const thead = document.getElementById('kelompok-score-thead');
+    const tbody = document.getElementById('kelompok-score-body');
+    const empty = document.getElementById('kelompok-empty-state');
+    const emptyText = document.getElementById('kelompok-empty-text');
+    const groups = allData.kelompok.groups.filter(g => g.class === cls);
+    const penilaians = allData.kelompok.penilaian.filter(p => p.class === cls);
+
+    if (!cls) {
+      listEl.innerHTML = '<div class="md:col-span-2 text-center text-gray-500 py-6 text-sm">Pilih kelas untuk mengelola kelompok</div>';
+    } else if (!groups.length) {
+      listEl.innerHTML = `<div class="md:col-span-2 text-center text-gray-500 py-6 text-sm">Belum ada kelompok di kelas ${cls}. Klik "+ Tambah Kelompok".</div>`;
+    } else {
+      listEl.innerHTML = groups.map(g => `
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+          <div class="flex justify-between items-start mb-3">
+            <div><h4 class="font-bold text-blue-900">${escapeHtml(g.name)}</h4><p class="text-xs text-gray-500">${g.members.length} anggota</p></div>
+            <div class="flex gap-1">
+              <button onclick="openEditGroup('${g.id}')" class="w-7 h-7 rounded-lg bg-white border border-blue-100 text-blue-600 hover:bg-blue-100 text-sm" title="Edit">✏️</button>
+              <button onclick="confirmDeleteGroup('${g.id}')" class="w-7 h-7 rounded-lg bg-white border border-red-100 text-red-500 hover:bg-red-100 font-bold" title="Hapus">×</button>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-1">
+            ${g.members.length ? g.members.map(m => `<span class="bg-white border border-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">${escapeHtml(m.name)}</span>`).join('') : '<span class="text-gray-400 text-xs italic">Belum ada anggota</span>'}
+          </div>
+        </div>`).join('');
+    }
+
+    if (!cls || !groups.length) {
+      thead.innerHTML = ''; tbody.innerHTML = '';
+      emptyText.textContent = !cls ? 'Pilih kelas untuk mengelola kelompok' : 'Tambahkan kelompok terlebih dahulu';
+      empty.classList.remove('hidden'); return;
+    }
+    if (!penilaians.length) {
+      thead.innerHTML = ''; tbody.innerHTML = '';
+      emptyText.textContent = 'Belum ada penilaian. Klik "+ Penilaian Baru" untuk membuat kolom penilaian.';
+      empty.classList.remove('hidden'); return;
+    }
+    empty.classList.add('hidden');
+
+    let head = `<tr>
+      <th class="px-3 py-2 text-left text-xs font-bold">Kelompok</th>
+      <th class="px-3 py-2 text-center text-xs font-bold">Anggota</th>`;
+    penilaians.forEach(p => {
+      head += `<th class="px-2 py-2 text-center text-xs font-bold">
+        <div class="flex flex-col items-center leading-tight">
+          <span>${escapeHtml(p.title)}</span>
+          <button onclick="confirmDeletePenilaian('${p.id}')" class="text-red-300 hover:text-red-100 text-xs mt-0.5 font-bold" title="Hapus penilaian ini">✕ hapus</button>
+        </div></th>`;
+    });
+    head += `<th class="px-2 py-2 text-center text-xs font-bold">Rata-rata</th>
+      <th class="px-2 py-2 text-center text-xs font-bold">Aksi</th></tr>`;
+    thead.innerHTML = head;
+
+    const kkm = getKKM(cls);
+    tbody.innerHTML = groups.map(g => {
+      const hasData = penilaians.some(p => p.scores && numOf(p.scores[g.id]) !== null);
+      const isEdit = editRowId.kelompok === g.id;
+      const dis = (hasData && !isEdit) ? 'disabled' : '';
+      const cells = penilaians.map(p => {
+        const v = p.scores ? p.scores[g.id] : null;
+        return `<td class="px-2 py-2 text-center"><input type="number" min="0" max="100" inputmode="numeric" ${dis} value="${v ?? ''}" onchange="onKelompokScoreChange('${g.id}','${p.id}')" data-group="${g.id}" data-penilaian="${p.id}" class="kelompok-input"></td>`;
+      }).join('');
+      const aksi = isEdit
+        ? `<button onclick="saveKelompokRow('${g.id}')" class="btn-row-save" title="Simpan baris ini">💾</button>`
+        : (hasData ? `<button onclick="editKelompokRow('${g.id}')" class="btn-row-edit" title="Ubah nilai baris ini">✏️</button>` : '');
+      return `<tr class="border-b border-gray-100 hover:bg-blue-50 transition-colors ${isEdit ? 'row-editing' : ''}">
+        <td class="px-3 py-2 font-semibold text-gray-900 whitespace-nowrap">${escapeHtml(g.name)}</td>
+        <td class="px-3 py-2 text-center text-xs text-gray-500">${g.members.length} siswa</td>
+        ${cells}
+        <td class="px-2 py-2 text-center" id="kelompok-rata-${g.id}">${nilaiCellHtml(getGroupAvg(g.id), kkm)}</td>
+        <td class="px-2 py-2 text-center">${aksi}</td>
+      </tr>`;
+    }).join('');
+  }
+  function editKelompokRow(groupId) {
+    editRowId.kelompok = groupId;
+    renderKelompok();
+    showToast('✏️ Baris kelompok terbuka — ubah nilai lalu klik 💾');
+  }
+  function saveKelompokRow(groupId) {
+    document.querySelectorAll(`input.kelompok-input[data-group="${groupId}"]`).forEach(inp => {
+      onKelompokScoreChange(groupId, inp.dataset.penilaian);
+    });
+    editRowId.kelompok = null;
+    saveData(); renderKelompok(); updateDashboard();
+    showToast('✅ Nilai kelompok tersimpan & terkunci ☁️');
+  }
+  function onKelompokScoreChange(groupId, penilaianId) {
+    const p = allData.kelompok.penilaian.find(x => x.id === penilaianId);
+    const input = document.querySelector(`input.kelompok-input[data-group="${groupId}"][data-penilaian="${penilaianId}"]`);
+    if (!p || !input) return;
+    if (!p.scores) p.scores = {};
+    if (input.value === '') { delete p.scores[groupId]; }
+    else {
+      let n = Number(input.value);
+      if (isNaN(n)) { delete p.scores[groupId]; input.value = ''; }
+      else { n = Math.max(0, Math.min(100, n)); input.value = String(n); p.scores[groupId] = n; }
+    }
+    p.updated_at = new Date().toISOString();
+    const grp = allData.kelompok.groups.find(g => g.id === groupId);
+    const el = document.getElementById(`kelompok-rata-${groupId}`);
+    if (el) el.innerHTML = nilaiCellHtml(getGroupAvg(groupId), grp ? getKKM(grp.class) : null);
+    saveData();
+    updateDashboard();
+  }
+  function openAddGroup() {
+    const cls = document.getElementById('select-kelompok-class').value;
+    if (!cls) { showToast('Pilih kelas terlebih dahulu'); return; }
+    editGroupId = null;
+    document.getElementById('modal-group-title').textContent = 'Tambah Kelompok';
+    const count = allData.kelompok.groups.filter(g => g.class === cls).length;
+    document.getElementById('input-group-name').value = `Kelompok ${count + 1}`;
+    document.getElementById('input-group-class').value = cls;
+    document.getElementById('group-class-label').textContent = cls;
+    renderMemberCheckboxes(cls, null);
+    openModal('modal-add-group');
+  }
+  function openEditGroup(groupId) {
+    const g = allData.kelompok.groups.find(x => x.id === groupId);
+    if (!g) return;
+    editGroupId = groupId;
+    document.getElementById('modal-group-title').textContent = 'Edit Kelompok';
+    document.getElementById('input-group-name').value = g.name;
+    document.getElementById('input-group-class').value = g.class;
+    document.getElementById('group-class-label').textContent = g.class;
+    renderMemberCheckboxes(g.class, g.members);
+    openModal('modal-add-group');
+  }
+  function renderMemberCheckboxes(cls, currentMembers) {
+    const container = document.getElementById('group-members-list');
+    const students = allData.students.filter(s => s.student_class === cls).sort(byName);
+    if (!students.length) { container.innerHTML = '<p class="text-gray-400 text-sm text-center py-4">Belum ada siswa di kelas ini</p>'; return; }
+    container.innerHTML = students.map(s => {
+      const checked = currentMembers && currentMembers.some(m => m.id === s.id);
+      return `<label class="flex items-center gap-2 p-2 hover:bg-blue-50 rounded-lg cursor-pointer text-sm">
+        <input type="checkbox" value="${s.id}" data-name="${escapeHtml(s.student_name)}" class="member-checkbox" ${checked ? 'checked' : ''}>
+        <span class="font-medium">${escapeHtml(s.student_name)}</span></label>`;
+    }).join('');
+  }
+  function toggleAllMembers(check) {
+    document.querySelectorAll('.member-checkbox').forEach(cb => cb.checked = check);
+  }
+  function submitGroup(e) {
+    e.preventDefault();
+    const cls = document.getElementById('input-group-class').value;
+    const name = document.getElementById('input-group-name').value.trim();
+    const members = [...document.querySelectorAll('.member-checkbox:checked')].map(cb => ({ id: cb.value, name: cb.dataset.name }));
+    if (!name) { showToast('Isi nama kelompok'); return; }
+    if (!members.length) { showToast('Pilih minimal 1 anggota'); return; }
+    if (editGroupId) {
+      const g = allData.kelompok.groups.find(x => x.id === editGroupId);
+      if (g) { g.name = name; g.members = members; }
+      showToast('Kelompok diperbarui ☁️');
+    } else {
+      allData.kelompok.groups.push({ id: generateId(), name, class: cls, members, created_at: new Date().toISOString() });
+      showToast('Kelompok ditambahkan ☁️');
+    }
+    editGroupId = null;
+    saveData(); closeModal('modal-add-group'); renderKelompok(); updateDashboard();
+  }
+  function openAddPenilaian() {
+    const cls = document.getElementById('select-kelompok-class').value;
+    if (!cls) { showToast('Pilih kelas terlebih dahulu'); return; }
+    const count = allData.kelompok.penilaian.filter(p => p.class === cls).length;
+    document.getElementById('input-kelompok-penilaian-title').value = `Tugas Kelompok ${count + 1}`;
+    document.getElementById('penilaian-class-label').textContent = cls;
+    openModal('modal-add-kelompok-penilaian');
+  }
+  function submitKelompokPenilaian(e) {
+    e.preventDefault();
+    const cls = document.getElementById('penilaian-class-label').textContent;
+    const title = document.getElementById('input-kelompok-penilaian-title').value.trim();
+    if (!title) { showToast('Isi judul penilaian'); return; }
+    allData.kelompok.penilaian.push({ id: generateId(), title, class: cls, scores: {}, created_at: new Date().toISOString() });
+    saveData(); closeModal('modal-add-kelompok-penilaian'); renderKelompok(); updateDashboard();
+    showToast('Penilaian kelompok ditambahkan ☁️');
+  }
+
+  // ================= KONFIRMASI & HAPUS =================
+  function openConfirm(msg) {
+    document.getElementById('confirm-text').textContent = msg || 'Apakah Anda yakin?';
+    openModal('modal-confirm');
+  }
+  function confirmDeleteStudent(id) { deleteTarget = { type: 'student', id }; openConfirm('Hapus siswa ini beserta seluruh nilainya?'); }
+  function confirmDeleteAllStudents() { deleteTarget = { type: 'all_students' }; openConfirm('Hapus SEMUA siswa dan seluruh data penilaian?'); }
+  function confirmDeleteClassStudents() {
+    const cls = document.getElementById('filter-student-class').value;
+    if (!cls) { showToast('Pilih kelas terlebih dahulu'); return; }
+    deleteTarget = { type: 'class_students', className: cls };
+    openConfirm(`Hapus semua siswa kelas ${cls} beserta nilainya?`);
+  }
+  function confirmDeleteGroup(id) { deleteTarget = { type: 'group', id }; openConfirm('Hapus kelompok ini? Nilai kelompok juga akan terhapus.'); }
+  function confirmDeletePenilaian(id) { deleteTarget = { type: 'penilaian', id }; openConfirm('Hapus penilaian ini? Semua nilai pada penilaian ini akan hilang.'); }
+  function confirmResetSikap() {
+    const cls = document.getElementById('select-sikap-class').value;
+    if (!cls) { showToast('Pilih kelas terlebih dahulu'); return; }
+    deleteTarget = { type: 'reset_sikap', className: cls };
+    openConfirm(`Hapus SEMUA pertemuan SIKAP kelas ${cls}? (nilai akademik ikut berubah karena SIKAP masuk AH)`);
+  }
+  function confirmResetKelompok() {
+    const cls = document.getElementById('select-kelompok-class').value;
+    if (!cls) { showToast('Pilih kelas terlebih dahulu'); return; }
+    deleteTarget = { type: 'reset_kelompok', className: cls };
+    openConfirm(`Hapus semua kelompok & penilaian kelas ${cls}?`);
+  }
+  function executeDelete() {
+    if (!deleteTarget) return;
+    const t = deleteTarget;
+    switch (t.type) {
+      case 'student':
+        allData.students = allData.students.filter(s => s.id !== t.id);
+        allData.pertemuan.sikap.forEach(p => { if (p.scores) delete p.scores[t.id]; });
+        allData.akademik_semester.forEach(r => { if (r.scores) delete r.scores[t.id]; });
+        allData.kelompok.groups.forEach(g => { g.members = g.members.filter(m => m.id !== t.id); });
+        showToast('Siswa & nilainya dihapus'); break;
+      case 'all_students':
+        allData = { students: [], pertemuan: { sikap: [] }, akademik_semester: [], kelompok: { groups: [], penilaian: [] } };
+        showToast('Semua data dihapus'); break;
+      case 'class_students':
+        allData.students = allData.students.filter(s => s.student_class !== t.className);
+        allData.pertemuan.sikap = allData.pertemuan.sikap.filter(p => p.class !== t.className);
+        allData.akademik_semester = allData.akademik_semester.filter(r => r.class !== t.className);
+        allData.kelompok.groups = allData.kelompok.groups.filter(g => g.class !== t.className);
+        allData.kelompok.penilaian = allData.kelompok.penilaian.filter(p => p.class !== t.className);
+        showToast(`Kelas ${t.className} dihapus`); break;
+      case 'sikap_pertemuan':
+        allData.pertemuan.sikap = allData.pertemuan.sikap.filter(p => p.id !== t.id);
+        showToast('Pertemuan SIKAP dihapus'); break;
+      case 'group': {
+        const gid = t.id;
+        allData.kelompok.groups = allData.kelompok.groups.filter(g => g.id !== gid);
+        allData.kelompok.penilaian.forEach(p => { if (p.scores) delete p.scores[gid]; });
+        showToast('Kelompok dihapus'); break;
+      }
+      case 'penilaian':
+        allData.kelompok.penilaian = allData.kelompok.penilaian.filter(p => p.id !== t.id);
+        showToast('Penilaian dihapus'); break;
+      case 'reset_sikap':
+        allData.pertemuan.sikap = allData.pertemuan.sikap.filter(p => p.class !== t.className);
+        showToast(`Data SIKAP kelas ${t.className} direset`); break;
+      case 'reset_akademik':
+        allData.akademik_semester = allData.akademik_semester.filter(r => r.class !== t.className);
+        showToast(`Data Akademik kelas ${t.className} direset`); break;
+      case 'reset_kelompok':
+        allData.kelompok.groups = allData.kelompok.groups.filter(g => g.class !== t.className);
+        allData.kelompok.penilaian = allData.kelompok.penilaian.filter(p => p.class !== t.className);
+        showToast(`Data kelompok kelas ${t.className} direset`); break;
+    }
+    saveData();
+    closeModal('modal-confirm');
+    deleteTarget = null;
+    updateClassDropdowns();
+    renderStudents(); renderSikap(); renderAkademik(); renderKelompok(); renderRekapNilai();
+    updateDashboard();
+  }
+
+  // ================= REKAP NILAI =================
+  function renderRekapNilai() {
+    const filter = document.getElementById('filter-rekap-nilai-class').value;
+    const students = getSortedStudents(filter);
+    const tbody = document.getElementById('rekap-nilai-body');
+    const empty = document.getElementById('rekap-nilai-empty');
+    if (!students.length) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+    tbody.innerHTML = students.map((s, i) => {
+      const kkm = getKKM(s.student_class);
+      const sikap = hitungSikapFinal(s.id, s.student_class);
+      const s1 = hitungAkademikSemester(s.id, s.student_class, 1).nilai;
+      const s2 = hitungAkademikSemester(s.id, s.student_class, 2).nilai;
+      const akadNilai = hitungAkademikFinal(s.id, s.student_class);
+      const kel = getStudentKelompokScore(s);
+      const grp = getStudentGroup(s);
+      return `<tr class="border-b border-gray-100 hover:bg-blue-50 transition-colors">
+        <td class="px-2 py-2 text-gray-600">${i+1}</td>
+        <td class="px-3 py-2 font-semibold text-gray-900 whitespace-nowrap">${escapeHtml(s.student_name)}</td>
+        <td class="px-2 py-2"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">${escapeHtml(s.student_class)}</span></td>
+        <td class="px-2 py-2 text-center">${nilaiCellHtml(sikap, null)}</td>
+        <td class="px-2 py-2 text-center text-xs">${predikatBadge(sikap === null ? '-' : predikatSikap(sikap))}</td>
+        <td class="px-2 py-2 text-center">${nilaiCellHtml(s1, kkm)}</td>
+        <td class="px-2 py-2 text-center">${nilaiCellHtml(s2, kkm)}</td>
+        <td class="px-2 py-2 text-center">${nilaiCellHtml(akadNilai, kkm)}</td>
+        <td class="px-2 py-2 text-center text-xs">${predikatBadge(akadNilai === null ? '-' : predikatAkademik(akadNilai))}</td>
+        <td class="px-2 py-2 text-center">${nilaiCellHtml(kel, kkm)}</td>
+        <td class="px-2 py-2 text-center text-xs text-gray-600">${grp ? escapeHtml(grp.name) : '-'}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  // ================= EXPORT EXCEL =================
+  function appendSheet(wb, aoa, name, cols) {
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    if (cols) ws['!cols'] = cols;
+    XLSX.utils.book_append_sheet(wb, ws, name);
+  }
+  function buildSikapAOA(filterClass) {
+    const aoa = [
+      ['PENILAIAN SIKAP — PER PERTEMUAN & AKUMULASI'], [CONFIG.school_name],
+      [`Mata Pelajaran: ${CONFIG.subject_name} — Guru: ${CONFIG.teacher_name}`],
+      ['Nilai per pertemuan = (Total Skor/25) x 100. Akumulasi = rata-rata seluruh pertemuan.'],
+      ['Akumulasi SIKAP otomatis menjadi komponen Asesmen Harian di Nilai Akademik.'], []
+    ];
+    let classes = getClasses();
+    if (filterClass) classes = classes.filter(c => c === filterClass);
+    const relevant = classes.filter(c => getSikapPertemuans(c).length);
+    if (!relevant.length) { aoa.push(['Belum ada data pertemuan SIKAP']); return aoa; }
+    relevant.forEach(cls => {
+      const pert = getSikapPertemuans(cls);
+      const students = getSortedStudents(cls);
+      aoa.push([`KELAS ${cls} — AKUMULASI`]);
+      aoa.push(['No','Nama Siswa', ...pert.map(p => `Pertemuan ${p.no}`), 'Akumulasi (0-100)','Predikat']);
+      students.forEach((s, i) => {
+        const per = pert.map(p => { const sc = p.scores[s.id]; const v = sc ? hitungSikapPertemuan(sc).nilai : null; return v === null ? '' : v; });
+        const fin = hitungSikapFinal(s.id, cls);
+        aoa.push([i+1, s.student_name, ...per, fin ?? '', fin === null ? 'Belum Dinilai' : predikatSikap(fin)]);
+      });
+      aoa.push([]);
+      pert.forEach(p => {
+        aoa.push([`KELAS ${cls} — PERTEMUAN ${p.no} (DETAIL)`]);
+        aoa.push(['No','Nama Siswa','Kebersihan','Kerapihan','Keaktifan','Sopan Santun','Kolaborasi','Total','Nilai']);
+        students.forEach((s, i) => {
+          const sc = p.scores[s.id];
+          if (sc && SIKAP_ASPECTS.some(a => numOf(sc[a.key]) !== null)) {
+            const c = hitungSikapPertemuan(sc);
+            aoa.push([i+1, s.student_name, ...SIKAP_ASPECTS.map(a => numOf(sc[a.key]) ?? ''), c.total, c.nilai]);
+          } else {
+            aoa.push([i+1, s.student_name, '', '', '', '', '', '', '']);
+          }
+        });
+        aoa.push([]);
+      });
+    });
+    return aoa;
+  }
+  function buildAkademikAOA(filterClass) {
+    const b = CONFIG.bobot;
+    const aoa = [
+      ['PENILAIAN AKADEMIK — PER SEMESTER & GABUNGAN'], [CONFIG.school_name],
+      [`Mata Pelajaran: ${CONFIG.subject_name} — Guru: ${CONFIG.teacher_name}`],
+      [`Rata AH = rata-rata (AH 1 + AH 2 + AH 3 + Nilai SIKAP). NA per Semester = ${b.tugas*100}% Rata Tugas + ${b.ah*100}% Rata AH + ${b.pts*100}% PTS + ${b.psas*100}% PSAS. Nilai Akhir (Gabungan) = rata-rata NA semester yang terisi.`],
+      ['KKM Akademik: Kelas X = 75, XI = 79, XII = 80'], []
+    ];
+    let classes = getClasses();
+    if (filterClass) classes = classes.filter(c => c === filterClass);
+    const relevant = classes.filter(c => SEMESTERS.some(sem => { const r = getAkadRec(c, sem); return r && Object.keys(r.scores).length; }));
+    if (!relevant.length) { aoa.push(['Belum ada data nilai Akademik']); return aoa; }
+    relevant.forEach(cls => {
+      const students = getSortedStudents(cls);
+      const kkm = getKKM(cls);
+      aoa.push([`KELAS ${cls} — GABUNGAN (KKM ${kkm})`]);
+      aoa.push(['No','Nama Siswa','NA Semester 1','NA Semester 2','Nilai Akhir (Gabungan)','Predikat','KKM','Tuntas?']);
+      students.forEach((s, i) => {
+        const s1 = hitungAkademikSemester(s.id, cls, 1).nilai;
+        const s2 = hitungAkademikSemester(s.id, cls, 2).nilai;
+        const fin = hitungAkademikFinal(s.id, cls);
+        aoa.push([i+1, s.student_name, s1 ?? '', s2 ?? '', fin ?? '',
+          fin === null ? 'Belum Dinilai' : predikatAkademik(fin), kkm,
+          fin === null ? '-' : (fin >= kkm ? 'Tuntas' : 'Belum Tuntas')]);
+      });
+      aoa.push([]);
+      SEMESTERS.forEach(sem => {
+        const rec = getAkadRec(cls, sem);
+        if (!rec || !Object.keys(rec.scores).length) return;
+        aoa.push([`KELAS ${cls} — SEMESTER ${sem} (DETAIL)`]);
+        aoa.push(['No','Nama Siswa','Tugas 1','Tugas 2','Tugas 3','Tugas 4','Tugas 5','Tugas 6','Rata Tugas','AH 1','AH 2','AH 3','SIKAP (otomatis)','Rata AH','PTS','PSAS','NA Semester','Predikat']);
+        students.forEach((s, i) => {
+          const sc = (rec.scores[s.id] || {});
+          const sikapVal = hitungSikapFinal(s.id, cls);
+          const c = hitungAkademik(sc, sikapVal);
+          aoa.push([i+1, s.student_name,
+            sc.tugas1 ?? '', sc.tugas2 ?? '', sc.tugas3 ?? '', sc.tugas4 ?? '', sc.tugas5 ?? '', sc.tugas6 ?? '', c.rataTugas ?? '',
+            sc.ah1 ?? '', sc.ah2 ?? '', sc.ah3 ?? '', sikapVal ?? '', c.rataAH ?? '', sc.pts ?? '', sc.psas ?? '',
+            c.nilai ?? '', c.nilai === null ? '' : c.predikat]);
+        });
+        aoa.push([]);
+      });
+    });
+    return aoa;
+  }
+  function buildKelompokAOA(filterClass) {
+    const aoa = [
+      ['PENILAIAN KELOMPOK'], [CONFIG.school_name],
+      [`Mata Pelajaran: ${CONFIG.subject_name} — Guru: ${CONFIG.teacher_name}`],
+      ['Hasil asesmen tugas kelompok (skala 0-100). Nilai kelompok berlaku untuk semua anggota.'], []
+    ];
+    let classes = [...new Set(allData.kelompok.groups.map(g => g.class))].sort();
+    if (filterClass) classes = classes.filter(c => c === filterClass);
+    if (!classes.length) { aoa.push(['Belum ada data kelompok']); return aoa; }
+    classes.forEach(cls => {
+      const penil = allData.kelompok.penilaian.filter(p => p.class === cls);
+      const groups = allData.kelompok.groups.filter(g => g.class === cls);
+      aoa.push([`KELAS ${cls}`]);
+      aoa.push(['No','Nama Siswa','Nama Kelompok', ...penil.map(p => p.title), 'Rata-rata']);
+      getSortedStudents(cls).forEach((s, idx) => {
+        const grp = groups.find(g => g.members.some(m => m.id === s.id));
+        if (grp) {
+          const row = [idx+1, s.student_name, grp.name];
+          penil.forEach(p => row.push(numOf(p.scores ? p.scores[grp.id] : null) ?? ''));
+          row.push(getGroupAvg(grp.id) ?? '');
+          aoa.push(row);
+        } else {
+          aoa.push([idx+1, s.student_name, '(Belum berkelompok)', ...penil.map(() => ''), '']);
+        }
+      });
+      aoa.push([]);
+    });
+    return aoa;
+  }
+  function buildRekapAOA(filterClass) {
+    const aoa = [
+      ['REKAP NILAI LENGKAP (AKUMULASI)'], [CONFIG.school_name],
+      [`Mata Pelajaran: ${CONFIG.subject_name} — Guru: ${CONFIG.teacher_name}`],
+      ['Nilai SIKAP otomatis menjadi komponen Asesmen Harian di Akademik.'],
+      ['KKM Akademik: Kelas X = 75, XI = 79, XII = 80'], [],
+      ['No','Nama Siswa','Kelas','Nilai SIKAP','Predikat SIKAP','NA Smt 1','NA Smt 2','Nilai Akademik (Gabungan)','Predikat Akademik','KKM','Tuntas?','Nilai Kelompok','Predikat Kelompok','Nama Kelompok']
+    ];
+    getSortedStudents(filterClass).forEach((s, i) => {
+      const kkm = getKKM(s.student_class);
+      const sikap = hitungSikapFinal(s.id, s.student_class);
+      const s1 = hitungAkademikSemester(s.id, s.student_class, 1).nilai;
+      const s2 = hitungAkademikSemester(s.id, s.student_class, 2).nilai;
+      const akad = hitungAkademikFinal(s.id, s.student_class);
+      const kel = getStudentKelompokScore(s);
+      const grp = getStudentGroup(s);
+      aoa.push([i+1, s.student_name, s.student_class,
+        sikap ?? '', sikap === null ? '-' : predikatSikap(sikap),
+        s1 ?? '', s2 ?? '',
+        akad ?? '', akad === null ? '-' : predikatAkademik(akad), kkm,
+        akad === null ? '-' : (akad >= kkm ? 'Tuntas' : 'Belum Tuntas'),
+        kel ?? '', kel === null ? '-' : predikatAkademik(kel),
+        grp ? grp.name : '-']);
+    });
+    return aoa;
+  }
+  const SIKAP_COLS = [{wch:4},{wch:28},{wch:12},{wch:11},{wch:11},{wch:11},{wch:13},{wch:12},{wch:11},{wch:16},{wch:20}];
+  const AKAD_COLS = [{wch:4},{wch:28},{wch:12},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:10},{wch:8},{wch:8},{wch:8},{wch:14},{wch:10},{wch:8},{wch:8},{wch:12},{wch:20}];
+  const REKAP_COLS = [{wch:4},{wch:28},{wch:12},{wch:12},{wch:20},{wch:10},{wch:10},{wch:14},{wch:20},{wch:8},{wch:13},{wch:14},{wch:18},{wch:20}];
+
+  function exportSikapExcel() {
+    if (!allData.students.length) { showToast('Belum ada data siswa'); return; }
+    const cls = document.getElementById('select-sikap-class').value;
+    const wb = XLSX.utils.book_new();
+    appendSheet(wb, buildSikapAOA(cls), 'Nilai SIKAP', SIKAP_COLS);
+    XLSX.writeFile(wb, `Nilai_SIKAP_${cls ? safeName(cls) : 'Semua_Kelas'}_${todayStr()}.xlsx`);
+    showToast('Excel Nilai SIKAP berhasil diunduh!');
+  }
+  function exportAkademikExcel() {
+    if (!allData.students.length) { showToast('Belum ada data siswa'); return; }
+    const cls = document.getElementById('select-akademik-class').value;
+    const wb = XLSX.utils.book_new();
+    appendSheet(wb, buildAkademikAOA(cls), 'Nilai Akademik', AKAD_COLS);
+    XLSX.writeFile(wb, `Nilai_Akademik_${cls ? safeName(cls) : 'Semua_Kelas'}_${todayStr()}.xlsx`);
+    showToast('Excel Nilai Akademik berhasil diunduh!');
+  }
+  function exportKelompokExcel() {
+    if (!allData.kelompok.groups.length) { showToast('Belum ada data kelompok'); return; }
+    const cls = document.getElementById('select-kelompok-class').value;
+    const wb = XLSX.utils.book_new();
+    appendSheet(wb, buildKelompokAOA(cls), 'Nilai Kelompok', [{wch:4},{wch:28},{wch:20}]);
+    XLSX.writeFile(wb, `Nilai_Kelompok_${cls ? safeName(cls) : 'Semua_Kelas'}_${todayStr()}.xlsx`);
+    showToast('Excel Nilai Kelompok berhasil diunduh!');
+  }
+  function exportExcelLengkap() {
+    if (!allData.students.length) { showToast('Belum ada data siswa'); return; }
+    const filter = document.getElementById('filter-rekap-nilai-class').value;
+    const wb = XLSX.utils.book_new();
+    appendSheet(wb, buildSikapAOA(filter), 'Nilai SIKAP', SIKAP_COLS);
+    appendSheet(wb, buildAkademikAOA(filter), 'Nilai Akademik', AKAD_COLS);
+    appendSheet(wb, buildKelompokAOA(filter), 'Nilai Kelompok', [{wch:4},{wch:28},{wch:20}]);
+    appendSheet(wb, buildRekapAOA(filter), 'Rekap Lengkap', REKAP_COLS);
+    XLSX.writeFile(wb, `Rekap_Penilaian_Lengkap_${filter ? safeName(filter) : 'Semua_Kelas'}_${todayStr()}.xlsx`);
+    showToast('Excel lengkap berhasil diunduh!');
+  }
+
+  // ================= EXPORT PDF REKAP =================
+  function downloadRekapPDF() {
+    if (!allData.students.length) { showToast('Belum ada data siswa'); return; }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    let startY = 26;
+    if (KOP_IMAGE) {
+      try {
+        const props = doc.getImageProperties(KOP_IMAGE);
+        const w = 190, h = (props.height / props.width) * w;
+        doc.addImage(KOP_IMAGE, 'PNG', 10, 8, w, h);
+        startY = 8 + h + 8;
+      } catch (e) { console.warn('Gagal menambahkan kop', e); }
+    } else {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
+      doc.text(CONFIG.school_name.toUpperCase(), 105, 13, { align: 'center' });
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+      doc.text('Penilaian Matematika KACIW', 105, 19, { align: 'center' });
+    }
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
+    doc.text('REKAP NILAI PESERTA DIDIK', 105, startY, { align: 'center' });
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+    doc.text(`${CONFIG.subject_name} — ${CONFIG.school_name}`, 105, startY + 6, { align: 'center' });
+    const filter = document.getElementById('filter-rekap-nilai-class').value;
+    doc.text(filter ? `Kelas: ${filter}` : 'Seluruh Kelas', 105, startY + 12, { align: 'center' });
+    doc.setFontSize(8);
+    doc.text('KKM Akademik: X = 75, XI = 79, XII = 80 (Nilai SIKAP masuk komponen Asesmen Harian)', 105, startY + 16.5, { align: 'center' });
+
+    const body = getSortedStudents(filter).map((s, i) => {
+      const sikap = hitungSikapFinal(s.id, s.student_class);
+      const akad = hitungAkademikFinal(s.id, s.student_class);
+      const kel = getStudentKelompokScore(s);
+      return [i+1, s.student_name, s.student_class,
+        sikap === null ? '-' : fmtNilai(sikap), sikap === null ? '-' : predikatSikap(sikap).split(' - ')[0],
+        akad === null ? '-' : fmtNilai(akad), akad === null ? '-' : predikatAkademik(akad).split(' - ')[0],
+        kel === null ? '-' : fmtNilai(kel)];
+    });
+
+    doc.autoTable({
+      startY: startY + 20,
+      head: [['No','Nama Siswa','Kelas','SIKAP','P','Akademik','P','Kelompok']],
+      body: body,
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [30, 64, 175], textColor: 255 },
+      alternateRowStyles: { fillColor: [241, 245, 255] },
+      columnStyles: { 0: { cellWidth: 10 }, 2: { cellWidth: 20 } },
+      didParseCell: function(data) {
+        if (data.section !== 'body') return;
+        const kelas = String(data.row.raw[2] || '');
+        if (data.column.index === 3) {
+          data.cell.styles.fontStyle = 'bold';
+        } else if (data.column.index === 5 || data.column.index === 7) {
+          const num = parseFloat(String(data.cell.raw).replace(',', '.'));
+          if (!isNaN(num)) {
+            data.cell.styles.textColor = num < getKKM(kelas) ? [220, 38, 38] : [22, 163, 74];
+            data.cell.styles.fontStyle = 'bold';
+          }
+        }
+      }
+    });
+
+    let finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY : startY + 30;
+    if (finalY > 235) { doc.addPage(); finalY = 30; }
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Kab. Tangerang, ${formatDateSignature(todayStr())}`, 132, finalY + 8);
+    doc.text('Guru Mata Pelajaran', 132, finalY + 14);
+    doc.setFont('helvetica', 'bold');
+    doc.text(CONFIG.teacher_name, 132, finalY + 38);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`NIP. ${CONFIG.teacher_nip}`, 132, finalY + 43);
+
+    doc.save(`Rekap_Nilai_${filter ? safeName(filter) : 'Semua_Kelas'}_${todayStr()}.pdf`);
+    showToast('PDF Rekap Nilai berhasil diunduh!');
+  }
+
+  // ================= EVENT LISTENERS =================
+  function setupEventListeners() {
+    document.getElementById('login-form').addEventListener('submit', handleLogin);
+    document.getElementById('btn-logout').addEventListener('click', handleLogout);
+
+    document.getElementById('btn-add-student-manual').addEventListener('click', () => openModal('modal-add-student'));
+    document.getElementById('form-add-student').addEventListener('submit', addStudent);
+    document.getElementById('btn-download-template').addEventListener('click', downloadTemplate);
+    document.getElementById('input-import-excel').addEventListener('change', handleImportExcel);
+    document.getElementById('btn-delete-all-students').addEventListener('click', confirmDeleteAllStudents);
+    document.getElementById('btn-delete-class-students').addEventListener('click', confirmDeleteClassStudents);
+    document.getElementById('filter-student-class').addEventListener('change', renderStudents);
+    document.getElementById('btn-confirm-delete-action').addEventListener('click', executeDelete);
+
+    document.getElementById('select-sikap-class').addEventListener('change', () => { document.getElementById('select-sikap-pertemuan').value = ''; editRowId.sikap = null; renderSikap(); });
+    document.getElementById('select-sikap-pertemuan').addEventListener('change', () => { editRowId.sikap = null; renderSikap(); });
+    document.getElementById('btn-add-sikap-pertemuan').addEventListener('click', addSikapPertemuan);
+    document.getElementById('btn-delete-sikap-pertemuan').addEventListener('click', confirmDeleteSikapPertemuan);
+    document.getElementById('btn-export-sikap-excel').addEventListener('click', exportSikapExcel);
+    document.getElementById('btn-reset-sikap').addEventListener('click', confirmResetSikap);
+
+    document.getElementById('select-akademik-class').addEventListener('change', () => { editRowId.akademik = null; renderAkademik(); });
+    document.getElementById('select-akademik-semester').addEventListener('change', () => { editRowId.akademik = null; renderAkademik(); });
+    document.getElementById('btn-export-akademik-excel').addEventListener('click', exportAkademikExcel);
+    document.getElementById('btn-reset-akademik').addEventListener('click', confirmResetAkademik);
+
+    document.getElementById('select-kelompok-class').addEventListener('change', () => { editRowId.kelompok = null; renderKelompok(); });
+    document.getElementById('btn-add-group').addEventListener('click', openAddGroup);
+    document.getElementById('btn-add-kelompok-penilaian').addEventListener('click', openAddPenilaian);
+    document.getElementById('form-add-group').addEventListener('submit', submitGroup);
+    document.getElementById('form-add-kelompok-penilaian').addEventListener('submit', submitKelompokPenilaian);
+    document.getElementById('btn-select-all-members').addEventListener('click', () => toggleAllMembers(true));
+    document.getElementById('btn-clear-members').addEventListener('click', () => toggleAllMembers(false));
+    document.getElementById('btn-export-kelompok-excel').addEventListener('click', exportKelompokExcel);
+    document.getElementById('btn-reset-kelompok').addEventListener('click', confirmResetKelompok);
+
+    document.getElementById('filter-rekap-nilai-class').addEventListener('change', renderRekapNilai);
+    document.getElementById('btn-download-excel-all').addEventListener('click', exportExcelLengkap);
+    document.getElementById('btn-download-pdf-rekap').addEventListener('click', downloadRekapPDF);
+  }
+</script>
+
+<style id="red-theme-override">
+  /* ================= RED THEME — WARNA SAJA ================= */
+  body.h-full {
+    background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 50%, #f87171 100%) !important;
+  }
+
+  .glass-effect {
+    background: rgba(127, 29, 29, 0.78) !important;
+    border-color: rgba(255,255,255,0.2) !important;
+  }
+
+  .card-glass {
+    border-color: rgba(185, 28, 28, 0.12) !important;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, rgba(153,27,27,0.95) 0%, rgba(220,38,38,0.95) 100%) !important;
+  }
+  .btn-primary:hover {
+    box-shadow: 0 8px 20px rgba(153,27,27,0.4) !important;
+  }
+
+  .menu-card:hover {
+    box-shadow: 0 12px 30px rgba(153,27,27,0.3) !important;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: rgba(220,38,38,0.5) !important;
+    box-shadow: 0 0 0 3px rgba(220,38,38,0.1) !important;
+  }
+
+  /* Mengganti utilitas Tailwind biru ke merah */
+  .text-blue-900 { color: #7f1d1d !important; }
+  .text-blue-800 { color: #991b1b !important; }
+  .text-blue-700 { color: #b91c1c !important; }
+  .text-blue-600 { color: #dc2626 !important; }
+  .text-blue-500 { color: #ef4444 !important; }
+  .text-blue-100 { color: #fee2e2 !important; }
+
+  .bg-blue-700 { background-color: #b91c1c !important; }
+  .bg-blue-600 { background-color: #dc2626 !important; }
+  .bg-blue-500 { background-color: #ef4444 !important; }
+  .bg-blue-100 { background-color: #fee2e2 !important; }
+  .bg-blue-50  { background-color: #fef2f2 !important; }
+
+  .border-blue-700 { border-color: #b91c1c !important; }
+  .border-blue-600 { border-color: #dc2626 !important; }
+  .border-blue-500 { border-color: #ef4444 !important; }
+  .border-blue-100 { border-color: #fecaca !important; }
+
+  .hover\:bg-blue-700:hover { background-color: #b91c1c !important; }
+  .hover\:bg-blue-600:hover { background-color: #dc2626 !important; }
+  .hover\:bg-blue-500:hover { background-color: #ef4444 !important; }
+
+  .hover\:border-blue-500:hover { border-color: #ef4444 !important; }
+
+  /* Gradient yang sebelumnya biru */
+  .from-cyan-400 {
+    --tw-gradient-from: #fb7185 var(--tw-gradient-from-position) !important;
+    --tw-gradient-to: rgb(251 113 133 / 0) var(--tw-gradient-to-position) !important;
+  }
+  .to-blue-600 {
+    --tw-gradient-to: #dc2626 var(--tw-gradient-to-position) !important;
+  }
+
+  /* Nuansa merah untuk elemen yang sebelumnya memakai blue */
+  .border-4.border-blue-100 {
+    border-color: #fecaca !important;
+  }
+
+  /* Header dan teks dashboard */
+  #header-school-name,
+  #dashboard-teacher-name {
+    color: #fee2e2 !important;
+  }
+
+  /* Tombol edit yang sebelumnya aksennya biru */
+  .btn-row-edit:hover {
+    border-color: #ef4444 !important;
+    background: #fef2f2 !important;
+  }
+  .btn-row-save {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+  }
+  .btn-row-save:hover {
+    background: #b91c1c !important;
+  }
+
+  /* Info box biru */
+  .bg-blue-50.border-blue-100 {
+    border-color: #fecaca !important;
+    color: #7f1d1d !important;
+  }
+
+  /* Dark mode tetap dipertahankan, hanya aksennya dibuat merah */
+  body.dark .btn-row-save {
+    background: #dc2626 !important;
+    border-color: #dc2626 !important;
+  }
+
+  /* Tombol Kembali: pastikan selalu dapat diklik */
+  button[onclick*="showPage('main')"] {
+    position: relative;
+    z-index: 10;
+    pointer-events: auto !important;
+    cursor: pointer;
+  }
+</style>
+
+</body>
+</html>
