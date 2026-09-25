@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pemulihan Data KACIW</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f8fafc;margin:0;padding:20px;color:#1e293b}
+.card{max-width:850px;margin:auto;background:white;border-radius:18px;padding:24px;box-shadow:0 8px 30px #0001}
+h1{margin-top:0}.box{background:#f1f5f9;padding:15px;border-radius:12px;margin:12px 0}
+button{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer;margin:4px}
+.primary{background:#2563eb;color:white}.green{background:#16a34a;color:white}.orange{background:#f97316;color:white}
+pre{white-space:pre-wrap;word-break:break-word;background:#0f172a;color:#e2e8f0;padding:15px;border-radius:10px;max-height:400px;overflow:auto}
+.ok{color:#15803d;font-weight:700}.warn{color:#b45309;font-weight:700}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🔎 Pemulihan Data KACIW</h1>
+<p><b>Jangan khawatir:</b> halaman ini hanya membaca data. Tidak menghapus dan tidak menulis data ke Supabase.</p>
+
+<div class="box">
+<h3>1. Data browser</h3>
+<div id="localStatus">Membaca...</div>
+<button class="green" onclick="downloadLocal()">⬇️ Simpan Cadangan Browser</button>
+</div>
+
+<div class="box">
+<h3>2. Data Supabase</h3>
+<div id="cloudStatus">Mengecek...</div>
+<button class="primary" onclick="readCloud()">🔄 Cek Lagi</button>
+<button class="green" onclick="downloadCloud()">⬇️ Simpan Cadangan Cloud</button>
+</div>
+
+<div class="box">
+<h3>3. Isi yang ditemukan</h3>
+<pre id="details">Belum ada.</pre>
+</div>
+
+<div class="box">
+<b>Setelah tombol cadangan menghasilkan file, jangan ubah atau hapus file tersebut.</b>
+</div>
+</div>
+
+<script>
+const SUPABASE_URL='https://prtwqltdwdtlhicawjrf.supabase.co';
+const SUPABASE_KEY='sb_publishable_rsXy5dEAWGZYmufHuTNBMg_vYwsTu6H';
+const STORAGE_KEYS=['kaciw_penilaian_cache_v6','kaciw_penilaian_data_v2','kaciw_penilaian_data_v1','kaciw_penilaian_cache_v5'];
+let localData=null, cloudData=null;
+
+function parseData(raw){
+  try{return raw?JSON.parse(raw):null}catch(e){return null}
+}
+function stats(d){
+  if(!d)return null;
+  let tugas2=0, groupScores=0;
+  (d.akademik_semester||[]).forEach(r=>{
+    Object.values(r.scores||{}).forEach(s=>{if(s&&s.tugas2!==undefined&&s.tugas2!==null&&s.tugas2!=='')tugas2++});
+  });
+  (d.kelompok?.penilaian||[]).forEach(p=>{
+    Object.keys(p.scores||{}).forEach(()=>groupScores++);
+  });
+  return {
+    siswa:(d.students||[]).length,
+    akademik:(d.akademik_semester||[]).length,
+    tugas2,
+    kelompok:(d.kelompok?.groups||[]).length,
+    penilaianKelompok:(d.kelompok?.penilaian||[]).length,
+    nilaiKelompok:groupScores
+  };
+}
+function show(){
+  const ls=stats(localData), cs=stats(cloudData);
+  document.getElementById('localStatus').innerHTML=ls
+    ? '<span class="ok">✓ Ada data browser</span> — Tugas 2: <b>'+ls.tugas2+'</b>, nilai kelompok: <b>'+ls.nilaiKelompok+'</b>'
+    : '<span class="warn">Tidak ditemukan data KACIW di localStorage.</span>';
+  document.getElementById('cloudStatus').innerHTML=cs
+    ? '<span class="ok">✓ Ada data cloud</span> — Tugas 2: <b>'+cs.tugas2+'</b>, nilai kelompok: <b>'+cs.nilaiKelompok+'</b>'
+    : '<span class="warn">Belum ada data cloud yang berhasil dibaca.</span>';
+  document.getElementById('details').textContent=JSON.stringify({browser:ls,cloud:cs},null,2);
+}
+function readLocal(){
+  for(const k of STORAGE_KEYS){
+    const d=parseData(localStorage.getItem(k));
+    if(d && (d.students?.length || d.akademik_semester?.length || d.kelompok?.groups?.length || d.kelompok?.penilaian?.length)){
+      localData=d; break;
+    }
+  }
+}
+async function readCloud(){
+  document.getElementById('cloudStatus').textContent='Sedang mengecek cloud...';
+  try{
+    const u=SUPABASE_URL+'/rest/v1/penilaian_data?id=eq.main&select=data,updated_at';
+    const res=await fetch(u,{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const rows=await res.json();
+    cloudData=rows[0]?.data||null;
+  }catch(e){
+    cloudData=null;
+    document.getElementById('cloudStatus').innerHTML='<span class="warn">Gagal membaca cloud: '+e.message+'</span>';
+  }
+  show();
+}
+function download(obj,name){
+  if(!obj){alert('Data belum ditemukan.');return}
+  const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function downloadLocal(){download(localData,'KACIW_CADANGAN_BROWSER.json')}
+function downloadCloud(){download(cloudData,'KACIW_CADANGAN_CLOUD.json')}
+readLocal();show();readCloud();
+</script>
+</body>
+</html>
