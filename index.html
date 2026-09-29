@@ -2271,7 +2271,13 @@ document.addEventListener('keydown', function(e) {
     reader.onload = ev => {
       try {
         const wb = XLSX.read(new Uint8Array(ev.target.result), {type:'array'});
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:''});
+        const rows = XLSX.utils.sheet_to_json(
+  wb.Sheets[wb.SheetNames[0]],
+  {
+    range: 4,
+    defval: ''
+  }
+);
         let updated=0, invalid=0, notFound=0;
         rows.forEach(row => {
           const name = String(row['Nama Siswa'] ?? row['Nama'] ?? '').trim();
@@ -2310,7 +2316,13 @@ document.addEventListener('keydown', function(e) {
     reader.onload = ev => {
       try {
         const wb = XLSX.read(new Uint8Array(ev.target.result), {type:'array'});
-        const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {defval:''});
+        const rows = XLSX.utils.sheet_to_json(
+  wb.Sheets[wb.SheetNames[0]],
+  {
+    range: 4,
+    defval: ''
+  }
+);
         const rec = ensureAkadRec(cls, sem);
         let updated=0, invalid=0, notFound=0;
         rows.forEach(row => {
